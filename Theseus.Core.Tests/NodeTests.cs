@@ -6,10 +6,10 @@ using Xunit;
 
 namespace Theseus.Core.Tests
 {
-    public class ProtocolUseCasesTests
+    public class NodeTests
     {
         [Fact]
-        public async Task NodeCanBroadcastHimself()
+        public async Task BroadcastPersonalBeacon_HappyPath()
         {
             //Arrange
             var srwcServiceMock = new Mock<ISrwcService>();

@@ -15,7 +15,6 @@ namespace Theseus.Core.Tests
             var srwcServiceMock = new Mock<ISrwcService>();
             var node = new Node(srwcServiceMock.Object);
 
-
             //Act
             await node.BroadcastPersonalBeacon();
 

@@ -19,6 +19,8 @@ namespace Theseus.Core.Tests
             var dkgNode3 = new Node(srwcService);
             var dkgNode4 = new Node(srwcService);
 
+            // srwcService.RegisterColleagues(new List)
+
             //Act
             await requestor.RequestDKG(prover.Id);
 

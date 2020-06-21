@@ -1,12 +1,24 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Theseus.Core.Tests
 {
-    internal class AdHocSrwcService : ISrwcService
+    internal class AdHocSrwcService : ISrwcService, IMediator
     {
-        public Task Broadcast(string v)
+        public List<IColleagues> colleagues { get; private set; }
+
+        public Task Broadcast(object message)
         {
-            throw new System.NotImplementedException();
+            return null;
+            // foreach (var node in colleagues)
+            // {
+            //     node.
+            // }
+        }
+
+        public void RegisterColleagues(List<IColleagues> colleagues)
+        {
+            this.colleagues = colleagues;
         }
     }
 }

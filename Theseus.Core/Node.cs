@@ -16,24 +16,50 @@ namespace Theseus.Core
             this.srwcService = srwcService;
         }
 
-        private string GenerateId()
-        {
-            return Guid.NewGuid().ToString();
-        }
 
         public async Task BroadcastPersonalBeacon()
         {
-            await srwcService.Broadcast("node 1 beacon");
+            var message = CreateBeaconMessage();
+            await srwcService.Broadcast(message);
         }
 
-        public Task RequestDKG(string id)
+        public async Task RequestDKG(string proverNodeId)
         {
-            throw new NotImplementedException();
+            var message = CreateDKGMessage(proverNodeId);
+            await srwcService.Broadcast(message);
         }
 
         public List<string> GetDKGPubs()
         {
             throw new NotImplementedException();
         }
+
+        public void ReceiveBeacon(Beacon beaconMessage)
+        {
+            throw new NotImplementedException();
+        }
+
+        private string GenerateId()
+        {
+            return Guid.NewGuid().ToString();
+        }
+
+        private Message CreateDKGMessage(string proverNodeId)
+        {
+            return new DkgMessage
+            {
+                ProverNodeId = proverNodeId,
+                MessageType = MessageType.DKG
+            };
+        }
+
+        private Beacon CreateBeaconMessage()
+        {
+            return new Beacon
+            {
+                Id = Id
+            };
+        }
+
     }
 }

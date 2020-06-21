@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
+using Theseus.Core.Exceptions;
 using Xunit;
 
 namespace Theseus.Core.Tests
@@ -19,7 +20,24 @@ namespace Theseus.Core.Tests
             await node.BroadcastPersonalBeacon();
 
             //Assert
-            srwcServiceMock.Verify(x => x.Broadcast("node 1 beacon"));            
+            srwcServiceMock.Verify(x => x.Broadcast(It.IsAny<Beacon>()));
+        }
+
+        /// <summary>
+        /// Nodes sign theirs beacons, so that other subjects cannot act as other loyal nodes.
+        /// </summary>
+        [Fact]
+        public void ReceiveBeacon_IncorrectSignature_Throws()
+        {
+            //Arrange
+            var srwcServiceMock = new Mock<ISrwcService>();
+            var node = new Node(srwcServiceMock.Object);
+            var beaconMessage = new Beacon{
+                Id = Guid.NewGuid().ToString()  
+            };
+
+            //Act, Assert
+            Assert.Throws<AuthenticationException>(()=>node.ReceiveBeacon(beaconMessage));
         }
     }
 }

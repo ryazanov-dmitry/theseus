@@ -1,3 +1,5 @@
+using System;
+using System.Text;
 using Theseus.Core.Crypto;
 using Xunit;
 
@@ -8,17 +10,18 @@ namespace Theseus.Core.Tests
 
 
         [Fact]
-        public void Verify()
+        public void Verify_HappyPath()
         {
             //Arrange
             var rsa = new RSA();
             var key = rsa.GenerateKeyPair();
-            var publicKeyToSign = key.Exponent 
-            //Act
+            byte[] signature = rsa.HashAndSign(key.Modulus, key);
 
-            rsa.Verify(string dataToVerify, string signature, )
+            //Act
+            var isValidSignature = rsa.Verify(key.Modulus, signature, key);
 
             //Assert
+            Assert.True(isValidSignature);
         }
     }
 }

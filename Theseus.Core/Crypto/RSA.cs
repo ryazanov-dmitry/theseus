@@ -3,7 +3,14 @@ using System.Security.Cryptography;
 
 namespace Theseus.Core.Crypto
 {
-    public class RSA
+    public interface IRsa
+    {
+        RSAParameters GenerateKeyPair();
+        byte[] HashAndSign(byte[] dataToSign, RSAParameters key);
+        bool Verify(byte[] originalData, byte[] signature, RSAParameters key);
+    }
+
+    public class RSA : IRsa
     {
         public RSAParameters GenerateKeyPair()
         {

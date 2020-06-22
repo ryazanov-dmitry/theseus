@@ -1,7 +1,7 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
+using Theseus.Core.Dto;
 using Theseus.Core.Exceptions;
 using Xunit;
 
@@ -32,12 +32,22 @@ namespace Theseus.Core.Tests
             //Arrange
             var srwcServiceMock = new Mock<ISrwcService>();
             var node = new Node(srwcServiceMock.Object);
-            var beaconMessage = new Beacon{
-                Id = Guid.NewGuid().ToString()  
+            var beaconMessage = new Beacon
+            {
+                Id = Guid.NewGuid().ToString()
             };
 
             //Act, Assert
-            Assert.Throws<AuthenticationException>(()=>node.ReceiveBeacon(beaconMessage));
+            Assert.Throws<AuthenticationException>(() => node.ReceiveBeacon(beaconMessage));
+        }
+
+        [Fact]
+        public void ReceiveDKGRequest_IncorrectSignature_Throws()
+        {
+            var node = new Node(new Mock<ISrwcService>().Object);
+            var DKGrequest = new DKGRequest{};
+
+            // node.ReceiveDKGrequest(DKGRequest);
         }
     }
 }

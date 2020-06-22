@@ -1,18 +1,32 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Theseus.Core.Crypto;
+using Theseus.Core.Dto;
 
 namespace Theseus.Core
 {
-    public class Node
+    public interface INode
+    {
+        string Id { get; }
+
+        Task BroadcastPersonalBeacon();
+        List<string> GetDKGPubs();
+        void ReceiveBeacon(Beacon beaconMessage);
+        Task RequestDKG(string proverNodeId);
+    }
+
+    public class Node : INode
     {
         public string Id { get; }
 
         private readonly ISrwcService srwcService;
+        private readonly IRsa rsa;
 
-        public Node(ISrwcService srwcService)
+        public Node(ISrwcService srwcService, IRsa rsa = null)
         {
             this.Id = GenerateId();
+            this.rsa = rsa;
             this.srwcService = srwcService;
         }
 
@@ -34,7 +48,7 @@ namespace Theseus.Core
             throw new NotImplementedException();
         }
 
-        public void ReceiveBeacon(Beacon beaconMessage)
+        public virtual void ReceiveBeacon(Beacon beaconMessage)
         {
             throw new NotImplementedException();
         }

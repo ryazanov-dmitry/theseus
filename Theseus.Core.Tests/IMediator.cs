@@ -4,11 +4,7 @@ namespace Theseus.Core.Tests
 {
     internal interface IMediator
     {
-        void RegisterColleagues(List<IColleagues> colleagues);
+        void RegisterColleagues(List<INode> colleagues);
     }
 
-    internal interface IColleagues
-    {
-
-    }
 }

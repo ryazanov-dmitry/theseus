@@ -1,22 +1,27 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Theseus.Core.Dto;
 
 namespace Theseus.Core.Tests
 {
     internal class AdHocSrwcService : ISrwcService, IMediator
     {
-        public List<IColleagues> colleagues { get; private set; }
+        public List<INode> colleagues { get; private set; }
 
-        public Task Broadcast(object message)
+        public async Task Broadcast(object message)
         {
-            return null;
-            // foreach (var node in colleagues)
-            // {
-            //     node.
-            // }
+
+            if (message is DKGRequest)
+            {
+                foreach (var node in this.colleagues)
+                {
+                    await node.ReceiveDKG((DKGRequest)message);
+                }
+            }
+
         }
 
-        public void RegisterColleagues(List<IColleagues> colleagues)
+        public void RegisterColleagues(List<INode> colleagues)
         {
             this.colleagues = colleagues;
         }

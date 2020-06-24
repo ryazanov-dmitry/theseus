@@ -1,6 +1,6 @@
 namespace Theseus.Core.Dto
 {
-    public class DKGRequest
+    public class DKGRequest : SignedObject
     {
         public string NodeId { get; set; }
     }

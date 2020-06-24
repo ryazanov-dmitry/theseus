@@ -14,19 +14,20 @@ namespace Theseus.Core
         Task BroadcastPersonalBeacon();
         List<string> GetDKGPubs();
         void ReceiveBeacon(Beacon beaconMessage);
+        Task ReceiveDKG(object message);
         Task RequestDKG(string proverNodeId);
     }
 
     public class Node : INode
     {
-        public string Id { get; }
+        public string Id => authentication.Base64PublicKey();
 
         private readonly ISrwcService srwcService;
         private readonly IAuthentication authentication;
 
         public Node(ISrwcService srwcService, IAuthentication authentication)
         {
-            this.Id = GenerateId();
+            authentication.SetupRSAKeyPairs();
             this.authentication = authentication;
             this.srwcService = srwcService;
         }
@@ -55,6 +56,11 @@ namespace Theseus.Core
             CheckPayloadNodeIdAndPublicKey(beaconMessage);
         }
 
+        public Task ReceiveDKG(DKGRequest dKGRequest)
+        {
+            throw new NotImplementedException();
+        }
+
         private void CheckPayloadNodeIdAndPublicKey(Beacon beaconMessage)
         {
             if (beaconMessage.Id != System.Convert.ToBase64String(beaconMessage.Key))
@@ -63,18 +69,15 @@ namespace Theseus.Core
             }
         }
 
-        private string GenerateId()
+        private DKGRequest CreateDKGMessage(string proverNodeId)
         {
-            return Guid.NewGuid().ToString();
-        }
-
-        private Message CreateDKGMessage(string proverNodeId)
-        {
-            return new DkgMessage
+            var dkgRequest = new DKGRequest
             {
-                ProverNodeId = proverNodeId,
-                MessageType = MessageType.DKG
+                NodeId = proverNodeId
             };
+
+            authentication.Sign(dkgRequest);
+            return dkgRequest;
         }
 
         private Beacon CreateBeaconMessage()

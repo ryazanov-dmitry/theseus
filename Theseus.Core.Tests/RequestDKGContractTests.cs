@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
 using Theseus.Core.Crypto;
@@ -30,7 +31,7 @@ namespace Theseus.Core.Tests
             var dkgNode3 = CreateNode();
             var dkgNode4 = CreateNode();
 
-            // srwcService.RegisterColleagues(new List)
+            srwcService.RegisterColleagues(new List<INode>{requestor,prover,dkgNode1,dkgNode2,dkgNode3, dkgNode4});
 
             //Act
             await requestor.RequestDKG(prover.Id);

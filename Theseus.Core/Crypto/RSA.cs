@@ -14,8 +14,15 @@ namespace Theseus.Core.Crypto
 
     public class RSA : IRsa
     {
-        public byte[] Exponent => new byte[] { 0x10, 0x00, 0x1 };
+        private readonly byte[] rsaExponent;
 
+        public byte[] Exponent => rsaExponent;
+
+        public RSA()
+        {
+            rsaExponent = GenerateKeyPair().Exponent;
+        }
+        
         public RSAParameters GenerateKeyPair()
         {
             RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();

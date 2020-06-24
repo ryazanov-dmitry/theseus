@@ -51,7 +51,6 @@ namespace Theseus.Core
         public virtual void ReceiveBeacon(Beacon beaconMessage)
         {
             authentication.Verify(beaconMessage);
-            
         }
 
         private string GenerateId()

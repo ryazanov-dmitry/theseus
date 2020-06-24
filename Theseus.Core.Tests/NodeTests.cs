@@ -50,6 +50,28 @@ namespace Theseus.Core.Tests
         }
 
         [Fact]
+        public void ReceiveBeacon_CorrectSignature_Returns()
+        {
+            //Arrange
+            var srwcServiceMock = new Mock<ISrwcService>();
+            var rsa = new RSA();
+            var auth = new Authentication(rsa);
+            var node = new Node(srwcServiceMock.Object, auth);
+            var key = rsa.GenerateKeyPair();
+            var beaconMessage = new Beacon
+            {
+                Id = Guid.NewGuid().ToString()
+            };
+            beaconMessage.Signature = rsa.HashAndSign(
+                beaconMessage.PlainData(), key);
+
+            beaconMessage.Key = key.Modulus;
+
+            //Act
+            node.ReceiveBeacon(beaconMessage);
+        }
+
+        [Fact]
         public void ReceiveDKGRequest_IncorrectSignature_Throws()
         {
             // var node = new Node(new Mock<ISrwcService>().Object);

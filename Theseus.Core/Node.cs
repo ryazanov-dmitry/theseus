@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Theseus.Core.Crypto;
 using Theseus.Core.Dto;
+using Theseus.Core.Exceptions;
 
 namespace Theseus.Core
 {
@@ -51,6 +52,15 @@ namespace Theseus.Core
         public virtual void ReceiveBeacon(Beacon beaconMessage)
         {
             authentication.Verify(beaconMessage);
+            CheckPayloadNodeIdAndPublicKey(beaconMessage);
+        }
+
+        private void CheckPayloadNodeIdAndPublicKey(Beacon beaconMessage)
+        {
+            if (beaconMessage.Id != System.Convert.ToBase64String(beaconMessage.Key))
+            {
+                throw new AuthenticationException("Broadcasted node beacon doesn't correspond to signature public key.");
+            }
         }
 
         private string GenerateId()

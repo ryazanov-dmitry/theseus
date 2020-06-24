@@ -60,7 +60,7 @@ namespace Theseus.Core.Tests
             var key = rsa.GenerateKeyPair();
             var beaconMessage = new Beacon
             {
-                Id = Guid.NewGuid().ToString()
+                Id = System.Convert.ToBase64String(key.Modulus)
             };
             beaconMessage.Signature = rsa.HashAndSign(
                 beaconMessage.PlainData(), key);
@@ -72,12 +72,35 @@ namespace Theseus.Core.Tests
         }
 
         [Fact]
-        public void ReceiveDKGRequest_IncorrectSignature_Throws()
+        public void ReceiveBeacon_PayloadNodeIdDiffersFromPublicKey_Throws()
         {
-            // var node = new Node(new Mock<ISrwcService>().Object);
-            // var dKGRequest = new DKGRequest{};
+            //Arrange
+            var srwcServiceMock = new Mock<ISrwcService>();
+            var rsa = new RSA();
+            var auth = new Authentication(rsa);
+            var node = new Node(srwcServiceMock.Object, auth);
+            var key = rsa.GenerateKeyPair();
+            var beaconMessage = new Beacon
+            {
+                Id = System.Convert.ToBase64String(rsa.GenerateKeyPair().Modulus)
+            };
+            beaconMessage.Signature = rsa.HashAndSign(
+                beaconMessage.PlainData(), key);
 
-            // node.ReceiveDKGrequest(DKGRequest);
+            beaconMessage.Key = key.Modulus;
+
+            //Act
+            var exception = Assert.Throws<AuthenticationException>(() => node.ReceiveBeacon(beaconMessage));
+
+            //Assert
+            Assert.Equal("Broadcasted node beacon doesn't correspond to signature public key.", exception.Message);
+
         }
+
+        // [Fact]
+        // public void ReceiveDKGRequest_IncorrectSignature_Throws()
+        // {
+        //     Assert.True(false);
+        // }
     }
 }

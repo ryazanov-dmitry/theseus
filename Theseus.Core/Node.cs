@@ -14,7 +14,7 @@ namespace Theseus.Core
         Task BroadcastPersonalBeacon();
         List<string> GetDKGPubs();
         void ReceiveBeacon(Beacon beaconMessage);
-        Task ReceiveDKG(object message);
+        Task ReceiveDKG(DKGRequest message);
         Task RequestDKG(string proverNodeId);
     }
 

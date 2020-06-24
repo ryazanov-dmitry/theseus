@@ -5,6 +5,8 @@ namespace Theseus.Core.Crypto
 {
     public interface IRsa
     {
+        byte[] Exponent { get; }
+
         RSAParameters GenerateKeyPair();
         byte[] HashAndSign(byte[] dataToSign, RSAParameters key);
         bool Verify(byte[] originalData, byte[] signature, RSAParameters key);
@@ -12,6 +14,8 @@ namespace Theseus.Core.Crypto
 
     public class RSA : IRsa
     {
+        public byte[] Exponent => new byte[] { 0x10, 0x00, 0x1 };
+
         public RSAParameters GenerateKeyPair()
         {
             RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
@@ -32,5 +36,7 @@ namespace Theseus.Core.Crypto
             RSAalg.ImportParameters(key);
             return RSAalg.VerifyData(originalData, new SHA1CryptoServiceProvider(), signature);
         }
+
     }
+
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using Moq;
+using Theseus.Core.Crypto;
 using Theseus.Core.Dto;
 using Theseus.Core.Exceptions;
 using Xunit;
@@ -14,7 +15,8 @@ namespace Theseus.Core.Tests
         {
             //Arrange
             var srwcServiceMock = new Mock<ISrwcService>();
-            var node = new Node(srwcServiceMock.Object);
+            var auth = new Mock<IAuthentication>();
+            var node = new Node(srwcServiceMock.Object, auth.Object);
 
             //Act
             await node.BroadcastPersonalBeacon();
@@ -27,15 +29,21 @@ namespace Theseus.Core.Tests
         /// Nodes sign theirs beacons, so that other subjects cannot act as other loyal nodes.
         /// </summary>
         [Fact]
-        public void ReceiveBeacon_IncorrectSignature_Throws()
+        public void ReceiveBeacon_SignedWithWrongKey_Throws()
         {
             //Arrange
             var srwcServiceMock = new Mock<ISrwcService>();
-            var node = new Node(srwcServiceMock.Object);
+            var rsa = new RSA();
+            var auth = new Authentication(rsa);
+            var node = new Node(srwcServiceMock.Object, auth);
             var beaconMessage = new Beacon
             {
                 Id = Guid.NewGuid().ToString()
             };
+            beaconMessage.Signature = rsa.HashAndSign(
+                beaconMessage.PlainData(), rsa.GenerateKeyPair());
+
+            beaconMessage.Key = rsa.GenerateKeyPair().Modulus;
 
             //Act, Assert
             Assert.Throws<AuthenticationException>(() => node.ReceiveBeacon(beaconMessage));
@@ -44,8 +52,8 @@ namespace Theseus.Core.Tests
         [Fact]
         public void ReceiveDKGRequest_IncorrectSignature_Throws()
         {
-            var node = new Node(new Mock<ISrwcService>().Object);
-            var DKGrequest = new DKGRequest{};
+            // var node = new Node(new Mock<ISrwcService>().Object);
+            // var dKGRequest = new DKGRequest{};
 
             // node.ReceiveDKGrequest(DKGRequest);
         }

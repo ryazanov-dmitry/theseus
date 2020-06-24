@@ -36,7 +36,10 @@ namespace Theseus.Core.Tests.Dto
             //Act
             var json = JsonConvert.SerializeObject(signedBeacon);
             var beacon = JsonConvert.DeserializeObject<Beacon>(json);
-            var isCorrectSignature = rsa.Verify(beacon.PlainData(), beacon.Signature, new System.Security.Cryptography.RSAParameters { Modulus = beacon.Key, Exponent = key.Exponent });
+            var isCorrectSignature = rsa.Verify(
+                    beacon.PlainData(), 
+                    beacon.Signature, 
+                    new System.Security.Cryptography.RSAParameters { Modulus = beacon.Key, Exponent = key.Exponent });
 
             //Assert
             Assert.Equal(originalPlainData, beacon.PlainData());

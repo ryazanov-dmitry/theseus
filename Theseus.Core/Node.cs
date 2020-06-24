@@ -21,12 +21,12 @@ namespace Theseus.Core
         public string Id { get; }
 
         private readonly ISrwcService srwcService;
-        private readonly IRsa rsa;
+        private readonly IAuthentication authentication;
 
-        public Node(ISrwcService srwcService, IRsa rsa = null)
+        public Node(ISrwcService srwcService, IAuthentication authentication)
         {
             this.Id = GenerateId();
-            this.rsa = rsa;
+            this.authentication = authentication;
             this.srwcService = srwcService;
         }
 
@@ -50,7 +50,8 @@ namespace Theseus.Core
 
         public virtual void ReceiveBeacon(Beacon beaconMessage)
         {
-            throw new NotImplementedException();
+            authentication.Verify(beaconMessage);
+            
         }
 
         private string GenerateId()

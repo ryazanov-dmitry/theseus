@@ -4,6 +4,9 @@ using Theseus.Core.Dto;
 
 namespace Theseus.Core.Tests
 {
+    /// <summary>
+    /// Short range wireless communication service.
+    /// </summary>
     internal class AdHocSrwcService : ISrwcService, IMediator
     {
         public List<INode> colleagues { get; private set; }

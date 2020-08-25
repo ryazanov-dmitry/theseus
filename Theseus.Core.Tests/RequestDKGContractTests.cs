@@ -8,13 +8,13 @@ namespace Theseus.Core.Tests
 {
     public class RequestDKGContractTests
     {
-        private readonly AdHocSrwcService srwcService;
+        private readonly AdHocSrwcService _srwcService;
         private IAuthentication authentication;
         private Mock<IAuthentication> authenticationMock;
 
         public RequestDKGContractTests()
         {
-            srwcService = CreateSrwc();
+            _srwcService = CreateSrwc();
             authenticationMock = new Mock<IAuthentication>();
             authentication = authenticationMock.Object;
         }
@@ -23,7 +23,6 @@ namespace Theseus.Core.Tests
         public async Task RequestDKG_4LoyalDKGNodes_RequestorReceives1DKGPub()
         {
             //Arrange
-            var srwcService = CreateSrwc();
             var requestor = CreateNode();
             var prover = CreateNode();
             var dkgNode1 = CreateNode();
@@ -31,7 +30,7 @@ namespace Theseus.Core.Tests
             var dkgNode3 = CreateNode();
             var dkgNode4 = CreateNode();
 
-            srwcService.RegisterColleagues(new List<INode>{requestor,prover,dkgNode1,dkgNode2,dkgNode3, dkgNode4});
+            _srwcService.RegisterColleagues(new List<INode>{requestor,prover,dkgNode1,dkgNode2,dkgNode3, dkgNode4});
 
             //Act
             await requestor.RequestDKG(prover.Id);
@@ -43,7 +42,7 @@ namespace Theseus.Core.Tests
 
         private Node CreateNode()
         {
-            return new Node(srwcService, authentication);
+            return new Node(_srwcService, authentication);
         }
 
         private AdHocSrwcService CreateSrwc()

@@ -10,13 +10,25 @@ namespace Theseus.Core.Tests
 {
     public class NodeTests
     {
+        private readonly Mock<ISrwcService> srwcServiceMock;
+        private readonly Mock<IAuthentication> authentication;
+
+        private readonly Mock<IGPS> gps;
+        private readonly Mock<IWANCommunication> wanCommunication;
+
+        public NodeTests()
+        {
+            srwcServiceMock = new Mock<ISrwcService>();
+            authentication = new Mock<IAuthentication>();
+            gps = new Mock<IGPS>();
+            wanCommunication = new Mock<IWANCommunication>();
+        }
+
         [Fact]
         public async Task BroadcastPersonalBeacon_HappyPath()
         {
             //Arrange
-            var srwcServiceMock = new Mock<ISrwcService>();
-            var auth = new Mock<IAuthentication>();
-            var node = new Node(srwcServiceMock.Object, auth.Object);
+            var node = CreateNode();
 
             //Act
             await node.BroadcastPersonalBeacon();
@@ -32,10 +44,9 @@ namespace Theseus.Core.Tests
         public void ReceiveBeacon_SignedWithWrongKey_Throws()
         {
             //Arrange
-            var srwcServiceMock = new Mock<ISrwcService>();
             var rsa = new RSA();
             var auth = new Authentication(rsa);
-            var node = new Node(srwcServiceMock.Object, auth);
+            var node = CreateNode(auth);
             var beaconMessage = new Beacon
             {
                 Id = Guid.NewGuid().ToString()
@@ -49,14 +60,17 @@ namespace Theseus.Core.Tests
             Assert.Throws<AuthenticationException>(() => node.ReceiveBeacon(beaconMessage));
         }
 
+        
+
         [Fact]
         public void ReceiveBeacon_CorrectSignature_Returns()
         {
             //Arrange
             var srwcServiceMock = new Mock<ISrwcService>();
+            var gps = new Mock<IGPS>();
             var rsa = new RSA();
             var auth = new Authentication(rsa);
-            var node = new Node(srwcServiceMock.Object, auth);
+            var node = CreateNode(auth);
             var key = rsa.GenerateKeyPair();
             var beaconMessage = new Beacon
             {
@@ -75,10 +89,9 @@ namespace Theseus.Core.Tests
         public void ReceiveBeacon_PayloadNodeIdDiffersFromPublicKey_Throws()
         {
             //Arrange
-            var srwcServiceMock = new Mock<ISrwcService>();
             var rsa = new RSA();
             var auth = new Authentication(rsa);
-            var node = new Node(srwcServiceMock.Object, auth);
+            var node = CreateNode(auth);
             var key = rsa.GenerateKeyPair();
             var beaconMessage = new Beacon
             {
@@ -102,5 +115,15 @@ namespace Theseus.Core.Tests
         // {
         //     Assert.True(false);
         // }
+        
+        private Node CreateNode(IAuthentication auth)
+        {
+            return new Node(srwcServiceMock.Object, auth, gps.Object, wanCommunication.Object);
+        }
+
+        private Node CreateNode()
+        {
+            return CreateNode(authentication.Object);
+        }
     }
 }

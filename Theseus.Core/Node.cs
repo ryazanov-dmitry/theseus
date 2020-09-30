@@ -16,7 +16,7 @@ namespace Theseus.Core
         List<string> GetDKGPubs();
         void ReceiveBeacon(Beacon beaconMessage);
         Task ReceiveDKG(DKGRequest message);
-        Task RequestDKG(string proverNodeId);
+        Task RequestDKG(string proverNodeId, int proverCoords);
     }
 
     public class Node : INode
@@ -29,12 +29,14 @@ namespace Theseus.Core
         private readonly Coordinates coordinates;
         private readonly List<ReceivedBeacon> receivedBeacons;
         private readonly IWANCommunication wanCommunication;
+        private readonly IDKGClient dkgClient;
 
         public Node(
             ISrwcService srwcService,
             IAuthentication authentication,
             IGPS gps,
-            IWANCommunication wanCommunication)
+            IWANCommunication wanCommunication,
+            IDKGClient dkgClient)
         {
             authentication.SetupRSAKeyPairs();
             this.authentication = authentication;
@@ -43,6 +45,7 @@ namespace Theseus.Core
             this.gps = gps;
             this.coordinates = gps.GetGPSCoords();
             this.wanCommunication = wanCommunication;
+            this.dkgClient = dkgClient;
         }
 
 
@@ -52,9 +55,9 @@ namespace Theseus.Core
             await srwcService.Broadcast(message);
         }
 
-        public async Task RequestDKG(string proverNodeId)
+        public async Task RequestDKG(string proverNodeId, int proverCoords)
         {
-            var message = CreateDKGMessage(proverNodeId);
+            var message = CreateDKGMessage(proverNodeId, proverCoords);
             await srwcService.Broadcast(message);
         }
 
@@ -70,23 +73,22 @@ namespace Theseus.Core
             RegisterReceivedBeacon(beaconMessage);
         }
 
-        public Task ReceiveDKG(DKGRequest dKGRequest)
+        public async Task ReceiveDKG(DKGRequest dKGRequest)
         {
             authentication.Verify(dKGRequest);
 
             if (!dKGRequest.GPSCoordinates.Equals(coordinates.DummyCoords))
             {
-                srwcService.Broadcast(dKGRequest);
-                return null; //TODO: Is it ok?
+                await srwcService.Broadcast(dKGRequest);
+                return;
             }
 
             if(!ExistsValidBeacon(dKGRequest)){
                 wanCommunication.SendWarning();
-                return null;
+                return;
             }
 
-            //start dkg generation
-            throw new NotImplementedException();
+            await dkgClient.Generate();
         }
 
 
@@ -113,11 +115,12 @@ namespace Theseus.Core
             }
         }
 
-        private DKGRequest CreateDKGMessage(string proverNodeId)
+        private DKGRequest CreateDKGMessage(string proverNodeId, int proverCoords)
         {
             var dkgRequest = new DKGRequest
             {
-                NodeId = proverNodeId
+                NodeId = proverNodeId,
+                GPSCoordinates = proverCoords
             };
 
             authentication.Sign(dkgRequest);
@@ -137,7 +140,7 @@ namespace Theseus.Core
         private bool ExistsValidBeacon(DKGRequest dKGRequest)
         {
             return receivedBeacons
-                .Where(x => x.ReceivedDateTime > DateTime.Now.AddMinutes(5))
+                .Where(x => x.ReceivedDateTime > DateTime.Now.AddMinutes(-5))
                 .FirstOrDefault(x => x.Id == dKGRequest.NodeId) != null;
         }
     }

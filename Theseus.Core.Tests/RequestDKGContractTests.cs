@@ -13,18 +13,21 @@ namespace Theseus.Core.Tests
         private const int defaultCoords = 1;
         private readonly AdHocSrwcService srwcService;
         private Mock<IAuthentication> authenticationMock;
+        private IAuthentication authentication;
+
         private readonly Mock<IGPS> gps;
         private readonly Mock<IWANCommunication> wanCommunication;
+        private readonly Mock<IDKGClient> dkgClient;
 
         public RequestDKGContractTests()
         {
             srwcService = CreateSrwc();
             authenticationMock = new Mock<IAuthentication>();
+            authentication = authenticationMock.Object;
             gps = CreateGPSMock();
             wanCommunication = new Mock<IWANCommunication>();
-
+            dkgClient = CreateDKGClientMock();
         }
-
 
         [Fact]
         public async Task RequestDKG_4LoyalDKGNodes_RequestorReceives1DKGPub()
@@ -41,15 +44,14 @@ namespace Theseus.Core.Tests
 
             //Act
             await prover.BroadcastPersonalBeacon();
-            await requestor.RequestDKG(prover.Id);
+            await requestor.RequestDKG(prover.Id, defaultCoords);
 
             //Assert
-            var dkgPubs = requestor.GetDKGPubs();
-            Assert.NotEmpty(dkgPubs);
+            dkgClient.Verify(x => x.Generate(),Times.Exactly(6));
         }
 
         [Fact]
-        public void RequestDKG_ClaimedGPSDiffersFromNodesLocation_IgnoreAndPropagateRequest()
+        public async Task RequestDKG_ClaimedGPSDiffersFromNodesLocation_IgnoreAndPropagateRequest()
         {
             //Arrange
             var srwcMock = new Mock<ISrwcService>();
@@ -61,7 +63,7 @@ namespace Theseus.Core.Tests
             };
 
             //Act
-            receiverNode.ReceiveDKG(dkgRequest);
+            await receiverNode.ReceiveDKG(dkgRequest);
 
             //Assert
             srwcMock.Verify(x => x.Broadcast(It.Is<DKGRequest>(x => x.Equals(dkgRequest))),
@@ -70,7 +72,7 @@ namespace Theseus.Core.Tests
         }
 
         [Fact]
-        public void RequestDKG_NoBeaconReceivedWithClaimedId_SendWarning()
+        public async Task RequestDKG_NoBeaconReceivedWithClaimedId_SendWarning()
         {
             //Arrange
             var receiverNode = CreateNode();
@@ -81,7 +83,7 @@ namespace Theseus.Core.Tests
             wanCommunication.Setup(x => x.SendWarning());
 
             //Act
-            receiverNode.ReceiveDKG(dkgRequest);
+            await receiverNode.ReceiveDKG(dkgRequest);
 
             //Assert
             wanCommunication.Verify(x => x.SendWarning(), Times.Once);
@@ -94,7 +96,7 @@ namespace Theseus.Core.Tests
 
         private Node CreateNode(ISrwcService srwcService)
         {
-            return new Node(srwcService, authenticationMock.Object, gps.Object, wanCommunication.Object);
+            return new Node(srwcService, CreateAuth(), gps.Object, wanCommunication.Object, dkgClient.Object);
         }
 
         private AdHocSrwcService CreateSrwc()
@@ -108,6 +110,18 @@ namespace Theseus.Core.Tests
             {
                 DummyCoords = defaultCoords
             });
+            return mock;
+        }
+
+        private IAuthentication CreateAuth()
+        {
+            return new Authentication(new RSA());
+        }
+
+        private Mock<IDKGClient> CreateDKGClientMock()
+        {
+            var mock = new Mock<IDKGClient>();
+            mock.Setup(x => x.Generate());
             return mock;
         }
     }

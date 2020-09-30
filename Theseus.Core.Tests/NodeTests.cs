@@ -15,6 +15,7 @@ namespace Theseus.Core.Tests
 
         private readonly Mock<IGPS> gps;
         private readonly Mock<IWANCommunication> wanCommunication;
+        private readonly Mock<IDKGClient> dkgClient;
 
         public NodeTests()
         {
@@ -22,6 +23,7 @@ namespace Theseus.Core.Tests
             authentication = new Mock<IAuthentication>();
             gps = new Mock<IGPS>();
             wanCommunication = new Mock<IWANCommunication>();
+            dkgClient = new Mock<IDKGClient>();
         }
 
         [Fact]
@@ -118,7 +120,7 @@ namespace Theseus.Core.Tests
         
         private Node CreateNode(IAuthentication auth)
         {
-            return new Node(srwcServiceMock.Object, auth, gps.Object, wanCommunication.Object);
+            return new Node(srwcServiceMock.Object, auth, gps.Object, wanCommunication.Object, dkgClient.Object);
         }
 
         private Node CreateNode()

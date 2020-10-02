@@ -8,7 +8,6 @@ namespace Theseus.Core.Crypto
     public interface IAuthentication
     {
         void Verify(SignedObject beaconMessage);
-        void SetupRSAKeyPairs();
         string Base64PublicKey();
         void Sign(SignedObject dkgRequest);
     }
@@ -21,17 +20,12 @@ namespace Theseus.Core.Crypto
         public Authentication(IRsa rsa)
         {
             this.rsa = rsa;
-
+            this.rsaParams = rsa.GenerateKeyPair();
         }
 
         public string Base64PublicKey()
         {
             return System.Convert.ToBase64String(this.rsaParams.Modulus);
-        }
-
-        public void SetupRSAKeyPairs()
-        {
-            this.rsaParams = rsa.GenerateKeyPair();
         }
 
         public void Sign(SignedObject signedObject)

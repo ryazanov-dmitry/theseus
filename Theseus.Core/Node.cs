@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Theseus.Core.Crypto;
 using Theseus.Core.Dto;
 using Theseus.Core.Exceptions;
+using Theseus.Core.Messages;
 
 namespace Theseus.Core
 {
@@ -23,29 +24,30 @@ namespace Theseus.Core
     {
         public string Id => authentication.Base64PublicKey();
 
+        public const int BeaconValidTime = 5;
         private readonly ISrwcService srwcService;
         private readonly IAuthentication authentication;
         private readonly IGPS gps;
         private readonly Coordinates coordinates;
-        private readonly List<ReceivedBeacon> receivedBeacons;
         private readonly IWANCommunication wanCommunication;
         private readonly IDKGClient dkgClient;
+        private readonly IMessageLog messageLog;
 
         public Node(
             ISrwcService srwcService,
             IAuthentication authentication,
             IGPS gps,
             IWANCommunication wanCommunication,
-            IDKGClient dkgClient)
+            IDKGClient dkgClient,
+            IMessageLog messageLog)
         {
-            authentication.SetupRSAKeyPairs();
             this.authentication = authentication;
             this.srwcService = srwcService;
-            this.receivedBeacons = new List<ReceivedBeacon>();
             this.gps = gps;
             this.coordinates = gps.GetGPSCoords();
             this.wanCommunication = wanCommunication;
             this.dkgClient = dkgClient;
+            this.messageLog = messageLog;
         }
 
 
@@ -83,28 +85,19 @@ namespace Theseus.Core
                 return;
             }
 
-            if(!ExistsValidBeacon(dKGRequest)){
+            if (!ExistsValidBeacon(dKGRequest))
+            {
                 wanCommunication.SendWarning();
                 return;
             }
 
-            await dkgClient.Generate();
+            await dkgClient.TryInitDKGSession(dKGRequest.NodeId);
         }
 
 
         private void RegisterReceivedBeacon(Beacon beaconMessage)
         {
-            var receivedBeacon = RegisterReceiveTime(beaconMessage);
-            receivedBeacons.Add(receivedBeacon);
-        }
-
-        private ReceivedBeacon RegisterReceiveTime(Beacon beaconMessage)
-        {
-            return new ReceivedBeacon
-            {
-                Id = beaconMessage.Id,
-                ReceivedDateTime = DateTime.Now
-            };
+            messageLog.Log(beaconMessage.Key, beaconMessage);
         }
 
         private void CheckPayloadNodeIdAndPublicKey(Beacon beaconMessage)
@@ -139,9 +132,9 @@ namespace Theseus.Core
 
         private bool ExistsValidBeacon(DKGRequest dKGRequest)
         {
-            return receivedBeacons
-                .Where(x => x.ReceivedDateTime > DateTime.Now.AddMinutes(-5))
-                .FirstOrDefault(x => x.Id == dKGRequest.NodeId) != null;
+            return messageLog
+                .Get<Beacon>(sender: dKGRequest.NodeId, lastMinutes: BeaconValidTime)
+                .Any();
         }
     }
 }

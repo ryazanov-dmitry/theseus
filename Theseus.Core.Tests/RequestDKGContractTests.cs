@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Moq;
 using Theseus.Core.Crypto;
 using Theseus.Core.Dto;
+using Theseus.Core.Messages;
 using Xunit;
 
 namespace Theseus.Core.Tests
@@ -47,7 +48,7 @@ namespace Theseus.Core.Tests
             await requestor.RequestDKG(prover.Id, defaultCoords);
 
             //Assert
-            dkgClient.Verify(x => x.Generate(),Times.Exactly(6));
+        dkgClient.Verify(x => x.TryInitDKGSession(It.IsAny<string>()),Times.Exactly(6));
         }
 
         [Fact]
@@ -55,7 +56,7 @@ namespace Theseus.Core.Tests
         {
             //Arrange
             var srwcMock = new Mock<ISrwcService>();
-            srwcMock.Setup(x => x.Broadcast(It.IsAny<object>()));
+            srwcMock.Setup(x => x.Broadcast(It.IsAny<object>(), It.IsAny<object>()));
             var receiverNode = CreateNode(srwcMock.Object);
             var dkgRequest = new DKGRequest
             {
@@ -66,7 +67,7 @@ namespace Theseus.Core.Tests
             await receiverNode.ReceiveDKG(dkgRequest);
 
             //Assert
-            srwcMock.Verify(x => x.Broadcast(It.Is<DKGRequest>(x => x.Equals(dkgRequest))),
+            srwcMock.Verify(x => x.Broadcast(It.Is<DKGRequest>(x => x.Equals(dkgRequest)), It.IsAny<object>()),
                 Times.Once);
 
         }
@@ -96,7 +97,7 @@ namespace Theseus.Core.Tests
 
         private Node CreateNode(ISrwcService srwcService)
         {
-            return new Node(srwcService, CreateAuth(), gps.Object, wanCommunication.Object, dkgClient.Object);
+            return new Node(srwcService, Common.CreateAuth(), gps.Object, wanCommunication.Object, dkgClient.Object, new MessageLog());
         }
 
         private AdHocSrwcService CreateSrwc()
@@ -113,15 +114,10 @@ namespace Theseus.Core.Tests
             return mock;
         }
 
-        private IAuthentication CreateAuth()
-        {
-            return new Authentication(new RSA());
-        }
-
         private Mock<IDKGClient> CreateDKGClientMock()
         {
             var mock = new Mock<IDKGClient>();
-            mock.Setup(x => x.Generate());
+            mock.Setup(x => x.TryInitDKGSession(It.IsAny<string>()));
             return mock;
         }
     }

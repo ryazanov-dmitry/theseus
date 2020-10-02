@@ -4,6 +4,6 @@ namespace Theseus.Core
 {
     public interface ISrwcService
     {
-        Task Broadcast(object v);
+        Task Broadcast(object v, object sender = null);
     }
 }

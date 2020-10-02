@@ -4,6 +4,7 @@ using Moq;
 using Theseus.Core.Crypto;
 using Theseus.Core.Dto;
 using Theseus.Core.Exceptions;
+using Theseus.Core.Messages;
 using Xunit;
 
 namespace Theseus.Core.Tests
@@ -36,7 +37,7 @@ namespace Theseus.Core.Tests
             await node.BroadcastPersonalBeacon();
 
             //Assert
-            srwcServiceMock.Verify(x => x.Broadcast(It.IsAny<Beacon>()));
+            srwcServiceMock.Verify(x => x.Broadcast(It.IsAny<Beacon>(), It.IsAny<object>()));
         }
 
         /// <summary>
@@ -112,6 +113,15 @@ namespace Theseus.Core.Tests
 
         }
 
+        /// <summary>
+        /// Node must persist DKGRequests because beacon can come after it.
+        /// </summary>
+        [Fact]
+        public void NodeReceivedDKGRequestAndThenBeaconRequest_MustCall_TryInitDKGSession()
+        {
+            Assert.True(false);
+        }
+
         // [Fact]
         // public void ReceiveDKGRequest_IncorrectSignature_Throws()
         // {
@@ -120,7 +130,7 @@ namespace Theseus.Core.Tests
         
         private Node CreateNode(IAuthentication auth)
         {
-            return new Node(srwcServiceMock.Object, auth, gps.Object, wanCommunication.Object, dkgClient.Object);
+            return new Node(srwcServiceMock.Object, auth, gps.Object, wanCommunication.Object, dkgClient.Object, new MessageLog());
         }
 
         private Node CreateNode()

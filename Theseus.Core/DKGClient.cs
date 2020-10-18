@@ -14,6 +14,7 @@ namespace Theseus.Core
         Task TryInitDKGSession(string nodeId);
         Task ReceiveTryInitDKGSession(DKGInitRequest dKGStartRequest);
         Task ReceiveDKGStartSessionAccept(DKGStartSessionAccept dkgStartSessionAccept);
+        Task SendAccept(Guid dKGStartRequest);
     }
 
     public class DKGClient : IDKGClient
@@ -51,7 +52,7 @@ namespace Theseus.Core
 
             if (CurrentDidnotInitOrWasNotFirst(dKGStartRequest))
             {
-                await SendAccept(dKGStartRequest);
+                await SendAccept(dKGStartRequest.SessionId);
                 return;
             }
         }
@@ -78,9 +79,9 @@ namespace Theseus.Core
             LogOutcommingMessage(dkgStartRequest);
         }
 
-        private async Task SendAccept(DKGInitRequest dKGStartRequest)
+        public async Task SendAccept(Guid dkgSessionId)
         {
-            var dkgStartSessionAccept = CreateDKGStartSessionAccept(dKGStartRequest.SessionId);
+            var dkgStartSessionAccept = CreateDKGStartSessionAccept(dkgSessionId);
             await srwcService.Broadcast(dkgStartSessionAccept, this);
             LogOutcommingMessage(dkgStartSessionAccept);
         }

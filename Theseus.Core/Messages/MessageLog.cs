@@ -16,7 +16,7 @@ namespace Theseus.Core.Messages
 
         public List<TMessage> Get<TMessage>(object from, int lastMinutes)
         {
-            return messages.Where(x => x.Sender == from)
+            return messages.Where(x => from != null ? x.Sender == from : true)
                            .Where(x => x.SentDateTime > DateTime.Now.AddMinutes(-lastMinutes))
                            .Where(x => x.MessageObject is TMessage)
                            .Select(x => (TMessage)x.MessageObject)
@@ -26,6 +26,11 @@ namespace Theseus.Core.Messages
         public List<TMessage> Get<TMessage>(object sender)
         {
             return Get<TMessage>(sender, 3600);
+        }
+
+        public List<TMessage> Get<TMessage>(int lastMinutes)
+        {
+            return Get<TMessage>(null, lastMinutes);
         }
 
         public List<object> GetAll()
@@ -49,6 +54,7 @@ namespace Theseus.Core.Messages
         void Log(object sender, object message);
         List<TMessage> Get<TMessage>(object sender, int lastMinutes);
         List<TMessage> Get<TMessage>(object sender);
+        List<TMessage> Get<TMessage>(int lastMinutes);
         List<object> GetAll();
     }
 }

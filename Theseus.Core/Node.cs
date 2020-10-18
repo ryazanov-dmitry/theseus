@@ -25,6 +25,7 @@ namespace Theseus.Core
         public string Id => authentication.Base64PublicKey();
 
         public const int BeaconValidTime = 5;
+        private const int dkgSessionTimeout = 1;
         private readonly ISrwcService srwcService;
         private readonly IAuthentication authentication;
         private readonly IGPS gps;
@@ -73,6 +74,12 @@ namespace Theseus.Core
             authentication.Verify(beaconMessage);
             CheckPayloadNodeIdAndPublicKey(beaconMessage);
             RegisterReceivedBeacon(beaconMessage);
+
+            if (ExistsDKGSessionForThisBeacon(beaconMessage))
+            {
+                var dkgSessionId = GetCurrentDkgSessionId(beaconMessage.Id);
+                dkgClient.SendAccept(dkgSessionId.Value);
+            }
         }
 
         public async Task ReceiveDKG(DKGRequest dKGRequest)
@@ -93,7 +100,6 @@ namespace Theseus.Core
 
             await dkgClient.TryInitDKGSession(dKGRequest.NodeId);
         }
-
 
         private void RegisterReceivedBeacon(Beacon beaconMessage)
         {
@@ -135,6 +141,19 @@ namespace Theseus.Core
             return messageLog
                 .Get<Beacon>(sender: dKGRequest.NodeId, lastMinutes: BeaconValidTime)
                 .Any();
+        }
+
+        private bool ExistsDKGSessionForThisBeacon(Beacon beaconMessage)
+        {
+            return GetCurrentDkgSessionId(beaconMessage.Id) != null;
+        }
+
+        private Guid? GetCurrentDkgSessionId(string beaconProverId)
+        {
+            return messageLog
+                .Get<DKGInitRequest>(dkgSessionTimeout)
+                .Where(x => x.NodeId == beaconProverId)
+                .LastOrDefault()?.SessionId;
         }
     }
 }

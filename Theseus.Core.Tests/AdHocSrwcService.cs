@@ -51,7 +51,7 @@ namespace Theseus.Core.Tests
 
             if (message is DKGRequest dKGRequest)
             {
-                foreach (var node in this.colleagues)
+                foreach (var node in this.colleagues.Where(x => x != sender))
                 {
                     await node.ReceiveDKG(dKGRequest);
                 }
@@ -59,7 +59,7 @@ namespace Theseus.Core.Tests
 
             if (message is Beacon beacon)
             {
-                foreach (var node in this.colleagues)
+                foreach (var node in this.colleagues.Where(x => x != sender))
                 {
                     node.ReceiveBeacon(beacon);
                 }

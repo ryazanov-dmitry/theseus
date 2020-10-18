@@ -48,7 +48,7 @@ namespace Theseus.Core.Tests
             await requestor.RequestDKG(prover.Id, defaultCoords);
 
             //Assert
-        dkgClient.Verify(x => x.TryInitDKGSession(It.IsAny<string>()),Times.Exactly(6));
+            dkgClient.Verify(x => x.TryInitDKGSession(It.IsAny<string>()), Times.Exactly(5));
         }
 
         [Fact]
@@ -58,10 +58,12 @@ namespace Theseus.Core.Tests
             var srwcMock = new Mock<ISrwcService>();
             srwcMock.Setup(x => x.Broadcast(It.IsAny<object>(), It.IsAny<object>()));
             var receiverNode = CreateNode(srwcMock.Object);
+
             var dkgRequest = new DKGRequest
             {
                 GPSCoordinates = 2
             };
+            Common.CreateAuth().Sign(dkgRequest);
 
             //Act
             await receiverNode.ReceiveDKG(dkgRequest);
@@ -81,6 +83,8 @@ namespace Theseus.Core.Tests
             {
                 GPSCoordinates = defaultCoords
             };
+            Common.CreateAuth().Sign(dkgRequest);
+
             wanCommunication.Setup(x => x.SendWarning());
 
             //Act

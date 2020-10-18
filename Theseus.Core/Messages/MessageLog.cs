@@ -16,7 +16,7 @@ namespace Theseus.Core.Messages
 
         public List<TMessage> Get<TMessage>(object from, int lastMinutes)
         {
-            return messages.Where(x => from != null ? x.Sender == from : true)
+            return messages.Where(x => from != null ? x.Sender.Equals(from) : true)
                            .Where(x => x.SentDateTime > DateTime.Now.AddMinutes(-lastMinutes))
                            .Where(x => x.MessageObject is TMessage)
                            .Select(x => (TMessage)x.MessageObject)

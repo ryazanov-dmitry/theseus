@@ -61,7 +61,7 @@ namespace Theseus.Core
         public async Task RequestDKG(string proverNodeId, int proverCoords)
         {
             var message = CreateDKGMessage(proverNodeId, proverCoords);
-            await srwcService.Broadcast(message);
+            await srwcService.Broadcast(message, this);
         }
 
         public List<string> GetDKGPubs()
@@ -103,7 +103,7 @@ namespace Theseus.Core
 
         private void RegisterReceivedBeacon(Beacon beaconMessage)
         {
-            messageLog.Log(beaconMessage.Key, beaconMessage);
+            messageLog.Log(beaconMessage.Base64Key(), beaconMessage);
         }
 
         private void CheckPayloadNodeIdAndPublicKey(Beacon beaconMessage)

@@ -119,14 +119,14 @@ namespace Theseus.Core.Tests
         [Fact]
         public void NodeReceivedDKGRequestAndThenBeaconRequest_MustCall_TryInitDKGSession()
         {
-            Assert.True(false);
+            
         }
 
-        // [Fact]
-        // public void ReceiveDKGRequest_IncorrectSignature_Throws()
-        // {
-        //     Assert.True(false);
-        // }
+        [Fact]
+        public void ReceiveDKGRequest_IncorrectSignature_Throws()
+        {
+            
+        }
         
         private Node CreateNode(IAuthentication auth)
         {

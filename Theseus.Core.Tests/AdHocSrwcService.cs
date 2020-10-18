@@ -67,25 +67,25 @@ namespace Theseus.Core.Tests
 
             if (message is DKGInitRequest dkgInitRequest)
             {
-                foreach (var dkgClients in dkgClients.Where(x => x != sender))
+                foreach (var dkgClient in dkgClients.Where(x => x != sender))
                 {
-                    await dkgClients.ReceiveTryInitDKGSession(dkgInitRequest);
+                    await dkgClient.ReceiveTryInitDKGSession(dkgInitRequest);
                 }
             }
 
             if (message is DKGStartSessionAccept dkgStartSessionAccept)
             {
-                foreach (var dkgClients in dkgClients.Where(x => x != sender))
+                foreach (var dkgClient in dkgClients.Where(x => x != sender))
                 {
-                    await dkgClients.ReceiveDKGStartSessionAccept(dkgStartSessionAccept);
+                    await dkgClient.ReceiveDKGStartSessionAccept(dkgStartSessionAccept);
                 }
             }
 
             if (message is DKGSessionList dkgSessionList)
             {
-                foreach (var dkgClients in dkgClients.Where(x => x != sender))
+                foreach (var dkgClient in dkgClients.Where(x => x != sender))
                 {
-                    // await dkgClients.ReceiveDKGStartSessionAccept(dkgStartSessionAccept);
+                    // await dkgClient.ReceiveDKGStartSessionAccept(dkgStartSessionAccept);
                 }
             }
         }

@@ -29,32 +29,54 @@ namespace Theseus.Core.Tests
         {
             //Arrange
             var initiatorOfDKG = CreateClient();
-            var node2 = CreateClient();
-            var medium = new AdHocSrwcService();
-            medium.RegisterColleagues(new List<IDKGClient> { initiatorOfDKG, node2 });
-            const string NodeId = "someNodeId";
+
+            const string proverId = "someNodeId";
+
+            var dkgAcceptorLog = new MessageLog();
+            dkgAcceptorLog.Log(proverId, new Beacon());
+
+            var dkgAcceptor = CreateClient(dkgAcceptorLog);
+            medium.RegisterColleagues(new List<IDKGClient> { initiatorOfDKG, dkgAcceptor });
 
             //Act
-            await initiatorOfDKG.TryInitDKGSession(NodeId);
+            await initiatorOfDKG.TryInitDKGSession(proverId);
 
             //Assert
-            // Assert.True(medium.GetLastMessage()) //TODO: Last message DTO with some status?
+            Assert.True(medium.GetLastMessageFrom(dkgAcceptor) is DKGStartSessionAccept lastMessage);
         }
 
 
-        /// <summary>
-        /// Lets try approach without persisting request history, so node just sends new TryInitDKGSession
-        /// and 'master' node must handle this.
-        /// </summary>
         [Fact]
         public void NodeReceivesBeaconAfterDKGSessionStart_NodeSendsTryInitDKGSession_MasterNodeResponds()
         {
-            Assert.True(false);
             //Arrange
+            var proverAuth = Common.CreateAuth();
+            var proverId = proverAuth.Base64PublicKey();
+            var proverBeacon = new Beacon
+            {
+                Id = proverId
+            };
+            proverAuth.Sign(proverBeacon);
+
+            var masterNodeAuth = Common.CreateAuth();
+            var masterNode = CreateClient(new MessageLog(), masterNodeAuth);
+
+            var lateAuth = Common.CreateAuth();
+            var lateNodeMessageLog = new MessageLog();
+            lateNodeMessageLog.Log(masterNodeAuth.Base64PublicKey(), new DKGInitRequest
+            {
+                NodeId = proverId
+            });
+            var lateDkgClient = CreateClient(lateNodeMessageLog);
+            var lateNode = CreateNode(medium, lateAuth, lateDkgClient, lateNodeMessageLog);
+
             //Act
+            lateNode.ReceiveBeacon(proverBeacon);
 
             //Assert
+            Assert.True(medium.GetLastMessageFrom(lateDkgClient) is DKGStartSessionAccept lastMessage);
         }
+
 
         /// <summary>
         /// Lets assume we can use central time synchronization service. Node will store send time in request.
@@ -123,6 +145,14 @@ namespace Theseus.Core.Tests
         private IDKGClient CreateClient(MessageLog messageLog, IAuthentication auth)
         {
             return new DKGClient(medium, auth, messageLog, new Session(), new Chronos());
+        }
+
+        private Node CreateNode(ISrwcService srwcService, IAuthentication auth, IDKGClient dKGClient, MessageLog log)
+        {
+            var gpsMock = new Mock<IGPS>();
+            var wanComm = new Mock<IWANCommunication>();
+
+            return new Node(srwcService, auth, gpsMock.Object, wanComm.Object, dKGClient, log);
         }
     }
 }

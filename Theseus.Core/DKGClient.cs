@@ -40,6 +40,9 @@ namespace Theseus.Core
 
         public async Task ReceiveTryInitDKGSession(DKGInitRequest dKGStartRequest)
         {
+            auth.Verify(dKGStartRequest);
+            LogIncommingMessage(dKGStartRequest);
+
             if (NoBeaconReceived(dKGStartRequest))
             {
                 await SendDecline();
@@ -56,6 +59,7 @@ namespace Theseus.Core
         public async Task ReceiveDKGStartSessionAccept(DKGStartSessionAccept dkgStartSessionAccept)
         {
             auth.Verify(dkgStartSessionAccept);
+
             var dkgSession = session.Get(dkgStartSessionAccept.SessionId);
             dkgSession.Participants.Add(dkgStartSessionAccept.Base64Key());
         }
@@ -71,14 +75,14 @@ namespace Theseus.Core
             var dkgStartRequest = CreateDKGInitRequest(nodeId);
             CreateSessionAndSetTimeout(dkgStartRequest);
             await srwcService.Broadcast(dkgStartRequest, this);
-            LogMessage(dkgStartRequest);
+            LogOutcommingMessage(dkgStartRequest);
         }
 
         private async Task SendAccept(DKGInitRequest dKGStartRequest)
         {
             var dkgStartSessionAccept = CreateDKGStartSessionAccept(dKGStartRequest.SessionId);
             await srwcService.Broadcast(dkgStartSessionAccept, this);
-            LogMessage(dkgStartSessionAccept);
+            LogOutcommingMessage(dkgStartSessionAccept);
         }
 
         private async Task SendDKGSessionList(Guid sessionId)
@@ -87,7 +91,7 @@ namespace Theseus.Core
             var list = CreateDKGSessionList(dkgSession);
 
             await srwcService.Broadcast(list, this);
-            LogMessage(list);
+            LogOutcommingMessage(list);
         }
 
         private Task SendDecline()
@@ -162,9 +166,14 @@ namespace Theseus.Core
             return request;
         }
 
-        private void LogMessage(object dkgStartRequest)
+        private void LogOutcommingMessage(object dkgStartRequest)
         {
             messageLog.Log(auth.Base64PublicKey(), dkgStartRequest);
+        }
+
+        private void LogIncommingMessage(SignedObject message)
+        {
+            messageLog.Log(message.Base64Key(), message);
         }
     }
 

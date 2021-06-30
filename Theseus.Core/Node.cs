@@ -86,7 +86,7 @@ namespace Theseus.Core
         {
             authentication.Verify(dKGRequest);
 
-            if (!dKGRequest.GPSCoordinates.Equals(coordinates.DummyCoords))
+            if (!dKGRequest.GPSCoordinates.Equals(coordinates.X))
             {
                 await srwcService.Broadcast(dKGRequest);
                 return;

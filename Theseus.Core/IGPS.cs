@@ -5,8 +5,8 @@ namespace Theseus.Core
         Coordinates GetGPSCoords();
     }
 
-    public class Coordinates
+    public class Coordinates : ICom
     {
-        public int DummyCoords { get; set; }
+        public int X { get; set; }
     }
 }

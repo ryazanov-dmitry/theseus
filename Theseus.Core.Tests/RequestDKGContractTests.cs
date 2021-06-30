@@ -113,7 +113,7 @@ namespace Theseus.Core.Tests
             var mock = new Mock<IGPS>();
             mock.Setup(x => x.GetGPSCoords()).Returns(new Coordinates
             {
-                DummyCoords = defaultCoords
+                X = defaultCoords
             });
             return mock;
         }

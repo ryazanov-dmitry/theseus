@@ -1,0 +1,12 @@
+Theseus Demo MVP:
+    ☐ 1. I can setup verifier nodes on 1d plane.
+    ☐ 2. I can either choose percentage of malicios nodes or pass param on each verifier node.
+    ☐ 3. I can setup client node on 1d plane.
+    ☐ 4. I can setup drone node on 1d plane.
+    ☐ 5. I can graphically display 1d map with nodes.
+    ☐ 6. I can trigger client to order from particular drone.
+    ✘ 7. I can trigger drone to deliver package to client (or not) and in time (or not). @cancelled(21-06-30 08:48)
+    ☐ 8. I can render logs from all nodes.
+    ☐ 9. I can set speed of drone.
+    ☐ 10. I can set nodes communication data rate.
+    ☐ 11. I can animate map with

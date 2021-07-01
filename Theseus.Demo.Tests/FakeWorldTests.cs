@@ -30,14 +30,14 @@ namespace Theseus.Demo.Tests
         public void FakeWorldCanSeeMovingOfNode()
         {
             //Given
-            const int clientCoords = 3;
+            var clientCoords = new Coordinates { X = 3 };
 
             _world.AddSubject(new Subject { SubjectType = SubjectType.Courier, Coordinates = new Coordinates { X = 1 } });
-            _world.AddSubject(new Subject { SubjectType = SubjectType.Client, Coordinates = new Coordinates { X = clientCoords } });
+            _world.AddSubject(new Subject { SubjectType = SubjectType.Client, Coordinates = clientCoords });
 
             //When
-            _world.TriggerClient();
-            while(_world.SomeoneIsMoving);
+            _world.SimulateDKGReady();
+            while (_world.SomeoneIsMoving) ;
 
             //Then
             var coords = _world.GetCoords();
@@ -71,7 +71,7 @@ namespace Theseus.Demo.Tests
         {
         }
 
-        public List<INodeGateway> Nodes { get; } = new List<INodeGateway>();
+        public List<FakeNodeGateway> Nodes { get; } = new List<FakeNodeGateway>();
         public bool SomeoneIsMoving { get; internal set; }
 
         internal void AddSubject(Subject subject)
@@ -79,7 +79,7 @@ namespace Theseus.Demo.Tests
             switch (subject.SubjectType)
             {
                 case SubjectType.Verifier:
-                    Nodes.Add(CreateNode(subject.Coordinates));
+                    Nodes.Add(CreateNode(subject));
                     break;
                 default:; break;
             }
@@ -90,36 +90,62 @@ namespace Theseus.Demo.Tests
             throw new NotImplementedException();
         }
 
+        internal void SimulateDKGReady()
+        {
+            Nodes.Single(x => x.SubjectType == SubjectType.Courier).NavigateToClient();
+        }
+
         internal void TriggerClient()
         {
             throw new NotImplementedException();
         }
 
-        private INodeGateway CreateNode(Coordinates coordinates)
+        private FakeNodeGateway CreateNode(Subject subject)
         {
+            var fakeNavigator = new FakeNavigator();
             var mock = new Mock<IGPS>();
             mock.Setup(x => x.GetGPSCoords()).Returns(new Coordinates
             {
-                X = coordinates.X
+                X = subject.Coordinates.X
             });
-            var node = new Node(null, null, mock.Object, null, null, null);
-            var gateway = new FakeNodeGateway(node);
+
+            var node = new Node(null, null, mock.Object, null, null, null, fakeNavigator);
+            var gateway = new FakeNodeGateway(node, subject.SubjectType);
             return gateway;
+        }
+    }
+
+    internal class FakeNavigator : INavigation
+    {
+        public FakeNavigator()
+        {
+        }
+
+        public void NavigateTo(Coordinates currentClientCoords)
+        {
+            throw new NotImplementedException();
         }
     }
 
     internal class FakeNodeGateway : INodeGateway
     {
-        private INode node;
+        public INode Node { get; set; }
+        public SubjectType SubjectType { get; }
 
-        public FakeNodeGateway(INode node)
+        public FakeNodeGateway(INode node, SubjectType subjectType)
         {
-            this.node = node;
+            this.SubjectType = subjectType;
+            this.Node = node;
         }
 
         public void Receive(object message)
         {
             throw new NotImplementedException();
+        }
+
+        internal void NavigateToClient()
+        {
+            Node.NavigateToClient();
         }
     }
 

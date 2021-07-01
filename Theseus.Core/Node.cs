@@ -18,11 +18,16 @@ namespace Theseus.Core
         void ReceiveBeacon(Beacon beaconMessage);
         Task ReceiveDKG(DKGRequest message);
         Task RequestDKG(string proverNodeId, int proverCoords);
+
+        // TODO: I only want that Node can decide whether it is ready to navigate to client, 
+        // but for testing purposes it is public right now...
+        void NavigateToClient();
     }
 
     public class Node : INode
     {
         public string Id => authentication.Base64PublicKey();
+
 
         public const int BeaconValidTime = 5;
         private const int dkgSessionTimeout = 1;
@@ -33,14 +38,21 @@ namespace Theseus.Core
         private readonly IWANCommunication wanCommunication;
         private readonly IDKGClient dkgClient;
         private readonly IMessageLog messageLog;
+        private readonly INavigation navigation;
 
+
+
+        private Coordinates currentClientCoords;
+
+        
         public Node(
             ISrwcService srwcService,
             IAuthentication authentication,
             IGPS gps,
             IWANCommunication wanCommunication,
             IDKGClient dkgClient,
-            IMessageLog messageLog)
+            IMessageLog messageLog,
+            INavigation navigation)
         {
             this.authentication = authentication;
             this.srwcService = srwcService;
@@ -49,6 +61,7 @@ namespace Theseus.Core
             this.wanCommunication = wanCommunication;
             this.dkgClient = dkgClient;
             this.messageLog = messageLog;
+            this.navigation = navigation;
         }
 
 
@@ -154,6 +167,11 @@ namespace Theseus.Core
                 .Get<DKGInitRequest>(dkgSessionTimeout)
                 .Where(x => x.NodeId == beaconProverId)
                 .LastOrDefault()?.SessionId;
+        }
+
+        public void NavigateToClient()
+        {
+            navigation.NavigateTo(currentClientCoords);
         }
     }
 }

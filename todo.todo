@@ -1,2 +1,4 @@
 todo:
-    ☐ Implement Coordinates equal in FakeWorldCanSeeMovingOfNode.
+    ✔ Implement Coordinates equal in FakeWorldCanSeeMovingOfNode.e @done(21-07-01 09:07)
+    ☐ how node will persist client coords? We need to implement receive delivery request?
+        ☐ then we can finish "FakeWorldCanSeeMovingOfNode"

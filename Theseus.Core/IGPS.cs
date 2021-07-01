@@ -5,8 +5,14 @@ namespace Theseus.Core
         Coordinates GetGPSCoords();
     }
 
-    public class Coordinates : ICom
+    public class Coordinates
     {
         public int X { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            return obj is Coordinates coordinates &&
+                   X == coordinates.X;
+        }
     }
 }

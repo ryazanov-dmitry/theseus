@@ -1,7 +1,9 @@
+using System.Threading.Tasks;
+
 namespace Theseus.Core
 {
     public interface INavigation
     {
-        void NavigateTo(Coordinates currentClientCoords);
+        Task NavigateTo(Coordinates currentClientCoords);
     }
 }

@@ -18,10 +18,8 @@ namespace Theseus.Core
         void ReceiveBeacon(Beacon beaconMessage);
         Task ReceiveDKG(DKGRequest message);
         Task RequestDKG(string proverNodeId, int proverCoords);
-
-        // TODO: I only want that Node can decide whether it is ready to navigate to client, 
-        // but for testing purposes it is public right now...
-        void NavigateToClient();
+        Task ReceiveDeliveryRequest(DeliveryRequest deliveryRequest);
+        Task ReceiveDKGPublicKey(DKGPub DKGPub);
     }
 
     public class Node : INode
@@ -169,9 +167,27 @@ namespace Theseus.Core
                 .LastOrDefault()?.SessionId;
         }
 
-        public void NavigateToClient()
+        public async Task ReceiveDeliveryRequest(DeliveryRequest deliveryRequest)
         {
-            navigation.NavigateTo(currentClientCoords);
+            // TODO: Validate
+
+            // Send DKGRequest
+            currentClientCoords = new Coordinates { X = deliveryRequest.GPSCoordinates };
+            await RequestDKG(deliveryRequest.NodeId, deliveryRequest.GPSCoordinates);
+        }
+
+        public async Task ReceiveDKGPublicKey(DKGPub DKGPub)
+        {
+            // TODO: Validate
+
+            // TODO: Persist current session
+
+            await NavigateToClient(currentClientCoords);
+        }
+
+        private Task NavigateToClient(Coordinates currentClientCoords)
+        {
+            return navigation.NavigateTo(currentClientCoords);
         }
     }
 }

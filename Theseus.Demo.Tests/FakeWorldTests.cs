@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Moq;
 using Theseus.Core;
+using Theseus.Core.Dto;
 using Xunit;
 
 namespace Theseus.Demo.Tests
@@ -56,6 +58,7 @@ namespace Theseus.Demo.Tests
     {
         public Coordinates Coordinates { get; internal set; }
         public SubjectType SubjectType { get; internal set; }
+        public FakeNodeGateway FakeNodeGateway { get; set; }
     }
 
     internal enum SubjectType
@@ -71,7 +74,7 @@ namespace Theseus.Demo.Tests
         {
         }
 
-        public List<FakeNodeGateway> Nodes { get; } = new List<FakeNodeGateway>();
+        public List<Subject> Nodes { get; } = new List<Subject>();
         public bool SomeoneIsMoving { get; internal set; }
 
         internal void AddSubject(Subject subject)
@@ -79,7 +82,9 @@ namespace Theseus.Demo.Tests
             switch (subject.SubjectType)
             {
                 case SubjectType.Verifier:
-                    Nodes.Add(CreateNode(subject));
+                    var node = CreateNode(subject);
+                    subject.FakeNodeGateway = node;
+                    Nodes.Add(subject);
                     break;
                 default:; break;
             }
@@ -90,9 +95,21 @@ namespace Theseus.Demo.Tests
             throw new NotImplementedException();
         }
 
-        internal void SimulateDKGReady()
+        internal async Task SimulateDKGReady()
         {
-            Nodes.Single(x => x.SubjectType == SubjectType.Courier).NavigateToClient();
+            var courier = Nodes.Single(x => x.SubjectType == SubjectType.Courier);
+            var client = Nodes.Single(x => x.SubjectType == SubjectType.Client);
+
+            var deliveryRequest = new DeliveryRequest
+            {
+                GPSCoordinates = client.Coordinates.X,
+                NodeId = client.FakeNodeGateway.Node.Id
+            };
+
+            await courier.FakeNodeGateway.Node.ReceiveDeliveryRequest(deliveryRequest);
+
+            var dkgPub = new DKGPub { };
+            await courier.FakeNodeGateway.Node.ReceiveDKGPublicKey(dkgPub);
         }
 
         internal void TriggerClient()
@@ -141,11 +158,6 @@ namespace Theseus.Demo.Tests
         public void Receive(object message)
         {
             throw new NotImplementedException();
-        }
-
-        internal void NavigateToClient()
-        {
-            Node.NavigateToClient();
         }
     }
 

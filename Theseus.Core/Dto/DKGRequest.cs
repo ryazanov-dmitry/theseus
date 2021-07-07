@@ -14,6 +14,6 @@ namespace Theseus.Core.Dto
         /// TODO: For now just int to simplify.
         /// </summary>
         /// <value></value>
-        public int GPSCoordinates { get; set; }
+        public float GPSCoordinates { get; set; }
     }
 }

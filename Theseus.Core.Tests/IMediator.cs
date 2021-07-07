@@ -1,11 +1,11 @@
 using System.Collections.Generic;
+using Theseus.Core.Infrastructure;
 
 namespace Theseus.Core.Tests
 {
     internal interface IMediator
     {
-        void RegisterColleagues(List<INode> colleagues);
-        void RegisterColleagues(List<IDKGClient> colleagues);
+        void RegisterColleagues(List<FakeNodeGateway> colleagues);
     }
 
 }

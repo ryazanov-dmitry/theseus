@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Moq;
 using Theseus.Core.Crypto;
 using Theseus.Core.Dto;
+using Theseus.Core.Infrastructure;
 using Theseus.Core.Messages;
 using Xunit;
 
@@ -41,11 +42,11 @@ namespace Theseus.Core.Tests
             var dkgNode3 = CreateNode();
             var dkgNode4 = CreateNode();
 
-            srwcService.RegisterColleagues(new List<INode> { requestor, prover, dkgNode1, dkgNode2, dkgNode3, dkgNode4 });
+            srwcService.RegisterColleagues(new List<FakeNodeGateway> { requestor, prover, dkgNode1, dkgNode2, dkgNode3, dkgNode4 });
 
             //Act
-            await prover.BroadcastPersonalBeacon();
-            await requestor.RequestDKG(prover.Id, defaultCoords);
+            await prover.Node.BroadcastPersonalBeacon();
+            await requestor.Node.RequestDKG(prover.Node.Id, defaultCoords);
 
             //Assert
             dkgClient.Verify(x => x.TryInitDKGSession(It.IsAny<string>()), Times.Exactly(5));
@@ -66,7 +67,7 @@ namespace Theseus.Core.Tests
             Common.CreateAuth().Sign(dkgRequest);
 
             //Act
-            await receiverNode.ReceiveDKG(dkgRequest);
+            await receiverNode.Receive(dkgRequest);
 
             //Assert
             srwcMock.Verify(x => x.Broadcast(It.Is<DKGRequest>(x => x.Equals(dkgRequest)), It.IsAny<object>()),
@@ -88,20 +89,21 @@ namespace Theseus.Core.Tests
             wanCommunication.Setup(x => x.SendWarning());
 
             //Act
-            await receiverNode.ReceiveDKG(dkgRequest);
+            await receiverNode.Receive(dkgRequest);
 
             //Assert
             wanCommunication.Verify(x => x.SendWarning(), Times.Once);
         }
 
-        private Node CreateNode()
+        private FakeNodeGateway CreateNode()
         {
             return CreateNode(srwcService);
         }
 
-        private Node CreateNode(ISrwcService srwcService)
+        private FakeNodeGateway CreateNode(ISrwcService srwcService)
         {
-            return new Node(srwcService, Common.CreateAuth(), gps.Object, wanCommunication.Object, dkgClient.Object, new MessageLog());
+            var node = new Node(srwcService, Common.CreateAuth(), gps.Object, wanCommunication.Object, dkgClient.Object, new MessageLog(), null);
+            return new FakeNodeGateway(node);
         }
 
         private AdHocSrwcService CreateSrwc()

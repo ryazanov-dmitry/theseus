@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Moq;
 using Theseus.Core.Crypto;
 using Theseus.Core.Dto;
+using Theseus.Core.Infrastructure;
 using Theseus.Core.Messages;
 using Xunit;
 using Xunit.Abstractions;
@@ -36,13 +37,13 @@ namespace Theseus.Core.Tests
             dkgAcceptorLog.Log(proverId, new Beacon());
 
             var dkgAcceptor = CreateClient(dkgAcceptorLog);
-            medium.RegisterColleagues(new List<IDKGClient> { initiatorOfDKG, dkgAcceptor });
+            medium.RegisterColleagues(new List<FakeNodeGateway> { initiatorOfDKG, dkgAcceptor });
 
             //Act
-            await initiatorOfDKG.TryInitDKGSession(proverId);
+            await initiatorOfDKG.Node.DKGClient.TryInitDKGSession(proverId);
 
             //Assert
-            Assert.True(medium.GetLastMessageFrom(dkgAcceptor) is DKGStartSessionAccept lastMessage);
+            Assert.True(medium.GetLastMessageFrom(dkgAcceptor.Node.DKGClient) is DKGStartSessionAccept lastMessage);
         }
 
 
@@ -68,13 +69,13 @@ namespace Theseus.Core.Tests
                 NodeId = proverId
             });
             var lateDkgClient = CreateClient(lateNodeMessageLog);
-            var lateNode = CreateNode(medium, lateAuth, lateDkgClient, lateNodeMessageLog);
+            var lateNode = CreateNode(medium, lateAuth, lateDkgClient.Node.DKGClient, lateNodeMessageLog);
 
             //Act
             lateNode.ReceiveBeacon(proverBeacon);
 
             //Assert
-            Assert.True(medium.GetLastMessageFrom(lateDkgClient) is DKGStartSessionAccept lastMessage);
+            Assert.True(medium.GetLastMessageFrom(lateDkgClient.Node.DKGClient) is DKGStartSessionAccept lastMessage);
         }
 
 
@@ -105,17 +106,17 @@ namespace Theseus.Core.Tests
             var node1 = CreateClient(node1MessageLog);
             var node2 = CreateClient(node2MessageLog, node2Auth);
 
-            medium.RegisterColleagues(new List<IDKGClient> { node1, node2 });
+            medium.RegisterColleagues(new List<FakeNodeGateway> { node1, node2 });
 
             //Act
-            await node1.TryInitDKGSession(proverNodeId);
+            await node1.Node.DKGClient.TryInitDKGSession(proverNodeId);
 
             //Assert
             Assert.Equal(2, medium.GetAllMessages().Count);
-            Assert.True(medium.GetLastMessageFrom(node2) is DKGStartSessionAccept);
+            Assert.True(medium.GetLastMessageFrom(node2.Node.DKGClient) is DKGStartSessionAccept);
 
             Thread.Sleep(1000);
-            Assert.True(medium.GetLastMessageFrom(node1) is DKGSessionList);
+            Assert.True(medium.GetLastMessageFrom(node1.Node.DKGClient) is DKGSessionList);
         }
 
 
@@ -131,20 +132,25 @@ namespace Theseus.Core.Tests
             
         }
 
-        private IDKGClient CreateClient()
+        private FakeNodeGateway CreateClient()
         {
             return CreateClient(new MessageLog(), Common.CreateAuth());
         }
 
-        private IDKGClient CreateClient(MessageLog messageLog)
+        private FakeNodeGateway CreateClient(MessageLog messageLog)
         {
             return CreateClient(messageLog, Common.CreateAuth());
         }
 
 
-        private IDKGClient CreateClient(MessageLog messageLog, IAuthentication auth)
+        private FakeNodeGateway CreateClient(MessageLog messageLog, IAuthentication auth)
         {
-            return new DKGClient(medium, auth, messageLog, new Session(), new Chronos());
+            var gpsMock = new Mock<IGPS>();
+
+            var client = new DKGClient(medium, auth, messageLog, new Session(), new Chronos());
+            var node = new Node(medium, auth, gpsMock.Object, null, client, messageLog, null);
+            var gateway = new FakeNodeGateway(node);
+            return gateway;
         }
 
         private Node CreateNode(ISrwcService srwcService, IAuthentication auth, IDKGClient dKGClient, MessageLog log)
@@ -152,7 +158,7 @@ namespace Theseus.Core.Tests
             var gpsMock = new Mock<IGPS>();
             var wanComm = new Mock<IWANCommunication>();
 
-            return new Node(srwcService, auth, gpsMock.Object, wanComm.Object, dKGClient, log);
+            return new Node(srwcService, auth, gpsMock.Object, wanComm.Object, dKGClient, log, null);
         }
     }
 }

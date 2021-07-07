@@ -7,6 +7,6 @@ namespace Theseus.Core.Dto
     {
         public string NodeId { get; set; }
 
-        public int GPSCoordinates { get; set; }
+        public float GPSCoordinates { get; set; }
     }
 }

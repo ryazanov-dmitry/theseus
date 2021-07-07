@@ -23,6 +23,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Theseus.Demo\Theseus.Demo.csproj" />
     <ProjectReference Include="..\Theseus.Core\Theseus.Core.csproj" />
+    <ProjectReference Include="..\Theseus.Core.Tests\Theseus.Core.Tests.csproj" />
   </ItemGroup>
 
 </Project>

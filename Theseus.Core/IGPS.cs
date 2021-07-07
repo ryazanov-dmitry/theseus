@@ -7,7 +7,7 @@ namespace Theseus.Core
 
     public class Coordinates
     {
-        public int X { get; set; }
+        public float X { get; set; }
 
         public override bool Equals(object obj)
         {

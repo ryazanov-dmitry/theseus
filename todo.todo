@@ -3,6 +3,6 @@ todo:
     ☐ ReceiveDKGPublicKey validation.
     ☐ How node will receive DeliveryRequest
     ✔ Implement Coordinates equal in FakeWorldCanSeeMovingOfNode.e @done(21-07-01 09:07)
-    ☐ how node will persist client coords? We need to implement receive delivery request?
-        ☐ Implement INavigation that will update Subject coords.
-        ☐ then we can finish "FakeWorldCanSeeMovingOfNode"
+    ✔ how node will persist client coords? We need to implement receive delivery request? @done(21-07-07 08:07)
+        ✔ Implement INavigation that will update Subject coords. @done(21-07-06 09:09)
+        ✔ then we can finish "FakeWorldCanSeeMovingOfNode" @done(21-07-07 08:07)

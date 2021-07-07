@@ -6,26 +6,32 @@ using Theseus.Core.Crypto;
 using Theseus.Core.Dto;
 using Theseus.Core.Exceptions;
 using Theseus.Core.Messages;
+using Theseus.Core.Navigation;
 
 namespace Theseus.Core
 {
-    public interface INode
+    public interface INode : IMovable
     {
         string Id { get; }
+        IDKGClient DKGClient { get; }
 
         Task BroadcastPersonalBeacon();
         List<string> GetDKGPubs();
         void ReceiveBeacon(Beacon beaconMessage);
         Task ReceiveDKG(DKGRequest message);
-        Task RequestDKG(string proverNodeId, int proverCoords);
+        Task RequestDKG(string proverNodeId, float proverCoords);
         Task ReceiveDeliveryRequest(DeliveryRequest deliveryRequest);
-        Task ReceiveDKGPublicKey(DKGPub DKGPub);
+        void ReceiveDKGPublicKey(DKGPub DKGPub);
+
     }
 
     public class Node : INode
     {
         public string Id => authentication.Base64PublicKey();
 
+        // TODO: I am not sure we want it public..
+
+        public IDKGClient DKGClient => dkgClient;
 
         public const int BeaconValidTime = 5;
         private const int dkgSessionTimeout = 1;
@@ -34,6 +40,7 @@ namespace Theseus.Core
         private readonly IGPS gps;
         private readonly Coordinates coordinates;
         private readonly IWANCommunication wanCommunication;
+
         private readonly IDKGClient dkgClient;
         private readonly IMessageLog messageLog;
         private readonly INavigation navigation;
@@ -69,7 +76,7 @@ namespace Theseus.Core
             await srwcService.Broadcast(message);
         }
 
-        public async Task RequestDKG(string proverNodeId, int proverCoords)
+        public async Task RequestDKG(string proverNodeId, float proverCoords)
         {
             var message = CreateDKGMessage(proverNodeId, proverCoords);
             await srwcService.Broadcast(message, this);
@@ -125,7 +132,7 @@ namespace Theseus.Core
             }
         }
 
-        private DKGRequest CreateDKGMessage(string proverNodeId, int proverCoords)
+        private DKGRequest CreateDKGMessage(string proverNodeId, float proverCoords)
         {
             var dkgRequest = new DKGRequest
             {
@@ -176,18 +183,24 @@ namespace Theseus.Core
             await RequestDKG(deliveryRequest.NodeId, deliveryRequest.GPSCoordinates);
         }
 
-        public async Task ReceiveDKGPublicKey(DKGPub DKGPub)
+        // TODO: we need to receive multiple Public keys
+        public void ReceiveDKGPublicKey(DKGPub DKGPub)
         {
             // TODO: Validate
 
             // TODO: Persist current session
 
-            await NavigateToClient(currentClientCoords);
+            NavigateToClient(currentClientCoords);
         }
 
-        private Task NavigateToClient(Coordinates currentClientCoords)
+        private void NavigateToClient(Coordinates currentClientCoords)
         {
-            return navigation.NavigateTo(currentClientCoords);
+            navigation.NavigateTo(currentClientCoords);
+        }
+
+        public bool IsMoving()
+        {
+            return navigation.IsMoving();
         }
     }
 }

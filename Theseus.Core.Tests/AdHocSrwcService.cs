@@ -32,14 +32,6 @@ namespace Theseus.Core.Tests
             this.o = o;
         }
 
-        /// <summary>
-        /// This is dummy Broadcast. It imitates that srwc middleware classifies messages, which implies
-        /// Node's interface will be called with particular method like ReceiveDKG or ReceiveBeacon.
-        /// I guess its right...?
-        /// </summary>
-        /// <param name="message"></param>
-        /// <returns></returns>
-
         public async Task Broadcast(object message, object sender = null)
         {
             if (o != null)

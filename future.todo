@@ -1,1 +1,4 @@
 ☐ currently node has all methods for courier, verifier and client. we want to split it.
+☐ DeliveryRequest validation.
+☐ ReceiveDKGPublicKey validation.
+☐ How node will receive DeliveryRequest

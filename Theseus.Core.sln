@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Theseus.Demo", "Theseus.Dem
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Theseus.Demo.Tests", "Theseus.Demo.Tests\Theseus.Demo.Tests.csproj", "{7839787F-52DE-4452-96AF-E5943ACBB9C8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Theseus.Demo.Renderer", "Theseus.Demo.Renderer\Theseus.Demo.Renderer.csproj", "{F92FC54A-0AE2-47EF-B226-C3B9DEA374B2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,5 +74,17 @@ Global
 		{7839787F-52DE-4452-96AF-E5943ACBB9C8}.Release|x64.Build.0 = Release|Any CPU
 		{7839787F-52DE-4452-96AF-E5943ACBB9C8}.Release|x86.ActiveCfg = Release|Any CPU
 		{7839787F-52DE-4452-96AF-E5943ACBB9C8}.Release|x86.Build.0 = Release|Any CPU
+		{F92FC54A-0AE2-47EF-B226-C3B9DEA374B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F92FC54A-0AE2-47EF-B226-C3B9DEA374B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F92FC54A-0AE2-47EF-B226-C3B9DEA374B2}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F92FC54A-0AE2-47EF-B226-C3B9DEA374B2}.Debug|x64.Build.0 = Debug|Any CPU
+		{F92FC54A-0AE2-47EF-B226-C3B9DEA374B2}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F92FC54A-0AE2-47EF-B226-C3B9DEA374B2}.Debug|x86.Build.0 = Debug|Any CPU
+		{F92FC54A-0AE2-47EF-B226-C3B9DEA374B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F92FC54A-0AE2-47EF-B226-C3B9DEA374B2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F92FC54A-0AE2-47EF-B226-C3B9DEA374B2}.Release|x64.ActiveCfg = Release|Any CPU
+		{F92FC54A-0AE2-47EF-B226-C3B9DEA374B2}.Release|x64.Build.0 = Release|Any CPU
+		{F92FC54A-0AE2-47EF-B226-C3B9DEA374B2}.Release|x86.ActiveCfg = Release|Any CPU
+		{F92FC54A-0AE2-47EF-B226-C3B9DEA374B2}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -20,9 +20,12 @@ namespace Theseus.Core.Tests
 
         public List<FakeNodeGateway> colleagues;
         public readonly IMessageLog messageLog;
+        private readonly float _signalRange = 3;
+        private readonly bool _considerCoordinates = false;
 
-        public AdHocSrwcService()
+        public AdHocSrwcService(bool considerCoordinates = false)
         {
+            this._considerCoordinates = considerCoordinates;
             this.messageLog = new MessageLog();
         }
 
@@ -41,11 +44,28 @@ namespace Theseus.Core.Tests
 
             messageLog.Log(sender, message);
 
-            foreach (var node in this.colleagues.Where(x => x != sender && x.Node != sender && x.Node.DKGClient != sender))
+            var recepients = this.colleagues
+                                    .Where(x => x != sender && x.Node != sender && x.Node.DKGClient != sender);
+
+            if(_considerCoordinates)
+                recepients = recepients.Where(x => IsInRange(sender, x));
+
+            foreach (var node in recepients)
             {
                 await node.Receive(message);
             }
 
+        }
+
+        private bool IsInRange(object sender, FakeNodeGateway potentialReceiver)
+        {
+            var senderNode = this.colleagues.Single(x => x.Node == sender || x.Node.DKGClient == sender);
+
+            var distance = Geometry.Distance(
+                senderNode.Node.GetCoordinates().X,
+                potentialReceiver.Node.GetCoordinates().X);
+
+            return distance <= _signalRange;
         }
 
         public void RegisterColleagues(List<FakeNodeGateway> colleagues)

@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using Theseus.Core;
+using Theseus.Core.Tests;
 
 namespace Theseus.Demo
 {
@@ -45,10 +46,12 @@ namespace Theseus.Demo
             float deltaDistance = deltaT * _directedSpeed / 1000;
             _currentCoordinates.X += deltaDistance;
 
-            if (Math.Abs(_currentCoordinates.X - _currentTargetCoords.X) <= _navigationError)
+            if (Geometry.Distance(_currentCoordinates.X, _currentTargetCoords.X) <= _navigationError)
             {
                 _isMoving = false;
             }
         }
+
+        
     }
 }

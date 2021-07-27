@@ -22,7 +22,7 @@ namespace Theseus.Core
         Task RequestDKG(string proverNodeId, float proverCoords);
         Task ReceiveDeliveryRequest(DeliveryRequest deliveryRequest);
         void ReceiveDKGPublicKey(DKGPub DKGPub);
-
+        Coordinates GetCoordinates();
     }
 
     public class Node : INode
@@ -44,8 +44,6 @@ namespace Theseus.Core
         private readonly IDKGClient dkgClient;
         private readonly IMessageLog messageLog;
         private readonly INavigation navigation;
-
-
 
         private Coordinates currentClientCoords;
 
@@ -201,6 +199,11 @@ namespace Theseus.Core
         public bool IsMoving()
         {
             return navigation.IsMoving();
+        }
+
+        public Coordinates GetCoordinates()
+        {
+            return this.coordinates;
         }
     }
 }

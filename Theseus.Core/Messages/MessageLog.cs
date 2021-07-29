@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace Theseus.Core.Messages
 {
@@ -11,6 +14,14 @@ namespace Theseus.Core.Messages
 
         public MessageLog()
         {
+            this.messages = new List<Message>();
+        }
+        private readonly bool _writeToSeparateConsole = false;
+        private StreamWriter sw;
+
+        public MessageLog(bool writeToSeparateConsole)
+        {
+            this._writeToSeparateConsole = writeToSeparateConsole;
             this.messages = new List<Message>();
         }
 
@@ -40,12 +51,39 @@ namespace Theseus.Core.Messages
 
         public void Log(object sender, object message)
         {
-            this.messages.Add(new Message
+            var log = new Message
             {
                 MessageObject = message,
                 Sender = sender,
                 SentDateTime = DateTime.Now
-            });
+            };
+
+            if (_writeToSeparateConsole)
+                WriteToConsole(log);
+
+            this.messages.Add(log);
+        }
+
+        private void WriteToConsole(Message log)
+        {
+            if (sw == null)
+            {
+                ProcessStartInfo psi = new ProcessStartInfo("cmd.exe")
+                {
+                    RedirectStandardError = true,
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false
+                };
+
+                Process p = Process.Start(psi);
+
+                sw = p.StandardInput;
+                // StreamReader sr = p.StandardOutput;
+            }
+            var jsonString = JsonConvert.SerializeObject(log);
+            
+            sw.WriteLine(jsonString);
         }
     }
 

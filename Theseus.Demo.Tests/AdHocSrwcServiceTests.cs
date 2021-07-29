@@ -47,7 +47,7 @@ namespace Theseus.Demo.Tests
         {
             var coordinates = new Coordinates { X = sourceSignalCoords };
             var fakeGps = new FakeGPS(coordinates);
-            var fakeNavigator = new FakeNavigator(fakeGps, coordinates, _fakeWorld.Ticker);
+            var fakeNavigator = new FakeNavigator(fakeGps, _fakeWorld.Ticker);
             var node = new FakeReceivingNode(service, Common.CreateAuth(), fakeGps, null, null, null, fakeNavigator);
             return new FakeNodeGateway(node);
         }

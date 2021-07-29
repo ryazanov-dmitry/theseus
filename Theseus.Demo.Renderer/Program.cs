@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Moq;
 using Theseus.Core;
+using Theseus.Core.Messages;
 using Theseus.Core.Tests;
 
 namespace Theseus.Demo.Renderer
@@ -10,11 +11,13 @@ namespace Theseus.Demo.Renderer
     {
         private static FakeWorld world;
         private static ISrwcService medium;
+        private static IMessageLog log;
 
         static void Main(string[] args)
         {
             world = new FakeWorld();
             medium = new Mock<ISrwcService>().Object;
+            log = new MessageLog(writeToSeparateConsole: true);
 
 
             world.AddSubject(CreateSubject(SubjectType.Courier, 1));
@@ -39,9 +42,9 @@ namespace Theseus.Demo.Renderer
 
             var fakeGps = new FakeGPS(coordinates);
 
-            var fakeNavigator = new FakeNavigator(fakeGps, subject.Coordinates, world.Ticker);
+            var fakeNavigator = new FakeNavigator(fakeGps, world.Ticker);
 
-            var node = new Node(medium, Common.CreateAuth(), fakeGps, null, null, null, fakeNavigator);
+            var node = new Node(medium, Common.CreateAuth(), fakeGps, null, null, log, fakeNavigator);
             var gateway = new FakeNodeGateway(node);
             subject.FakeNodeGateway = gateway;
             return subject;

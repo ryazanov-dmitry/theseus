@@ -18,9 +18,9 @@ namespace Theseus.Demo
 
         private float _navigationError = 0.4F;
 
-        public FakeNavigator(IGPS gps, Coordinates currentCoordinates, Ticker ticker)
+        public FakeNavigator(IGPS gps, Ticker ticker)
         {
-            this._currentCoordinates = currentCoordinates;
+            this._currentCoordinates = gps.GetGPSCoords();
             this.gps = gps;
             ticker.Subscribe(this);
         }

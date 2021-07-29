@@ -67,6 +67,24 @@ namespace Theseus.Core
             this.navigation = navigation;
         }
 
+        public Node(
+            ISrwcService srwcService,
+            IGPS gps,
+            IWANCommunication wanCommunication,
+            IDKGClient dkgClient,
+            IMessageLog messageLog,
+            INavigation navigation)
+        {
+            this.authentication = new Authentication(new RSA());
+            this.srwcService = srwcService;
+            this.gps = gps;
+            this.coordinates = gps.GetGPSCoords();
+            this.wanCommunication = wanCommunication;
+            this.dkgClient = dkgClient;
+            this.messageLog = messageLog;
+            this.navigation = navigation;
+        }
+
 
         public async Task BroadcastPersonalBeacon()
         {

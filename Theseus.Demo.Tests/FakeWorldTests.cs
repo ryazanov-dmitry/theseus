@@ -57,7 +57,7 @@ namespace Theseus.Demo.Tests
 
             var fakeGps = new FakeGPS(coordinates);
 
-            var fakeNavigator = new FakeNavigator(fakeGps, subject.Coordinates, _world.Ticker);
+            var fakeNavigator = new FakeNavigator(fakeGps, _world.Ticker);
 
             var node = new Node(medium, Common.CreateAuth(), fakeGps, null, null, null, fakeNavigator);
             var gateway = new FakeNodeGateway(node);

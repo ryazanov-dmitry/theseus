@@ -1,6 +1,6 @@
 using System;
 
-namespace Theseus.Core.Tests
+namespace Theseus.Core
 {
     public static class Geometry
     {

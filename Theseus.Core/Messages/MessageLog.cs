@@ -54,12 +54,13 @@ namespace Theseus.Core.Messages
             var log = new Message
             {
                 MessageObject = message,
-                Sender = sender,
                 SentDateTime = DateTime.Now
             };
 
             if (_writeToSeparateConsole)
                 WriteToConsole(log);
+
+            log.Sender = sender;
 
             this.messages.Add(log);
         }
@@ -68,17 +69,14 @@ namespace Theseus.Core.Messages
         {
             if (sw == null)
             {
-                ProcessStartInfo psi = new ProcessStartInfo("cmd.exe")
-                {
-                    RedirectStandardError = true,
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false
-                };
+                Process proc = new System.Diagnostics.Process();
+                proc.StartInfo.FileName = "/bin/bash";
+                proc.StartInfo.UseShellExecute = false;
+                proc.StartInfo.RedirectStandardOutput = true;
+                proc.StartInfo.RedirectStandardInput = true;
+                proc.Start();
 
-                Process p = Process.Start(psi);
-
-                sw = p.StandardInput;
+                sw = proc.StandardInput;
                 // StreamReader sr = p.StandardOutput;
             }
             var jsonString = JsonConvert.SerializeObject(log);

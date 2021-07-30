@@ -23,10 +23,10 @@ namespace Theseus.Core.Tests
         private readonly float _signalRange = 3;
         private readonly bool _considerCoordinates = false;
 
-        public AdHocSrwcService(bool considerCoordinates = false)
+        public AdHocSrwcService(bool considerCoordinates = false, bool writeToSeparateConsole = false)
         {
             this._considerCoordinates = considerCoordinates;
-            this.messageLog = new MessageLog();
+            this.messageLog = new MessageLog(writeToSeparateConsole);
         }
 
         public AdHocSrwcService(ITestOutputHelper o)

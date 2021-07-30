@@ -7,6 +7,7 @@ using Theseus.Core.Dto;
 using Theseus.Core.Exceptions;
 using Theseus.Core.Messages;
 using Theseus.Core.Navigation;
+using Theseus.Core.States;
 
 namespace Theseus.Core
 {
@@ -35,6 +36,7 @@ namespace Theseus.Core
 
         public const int BeaconValidTime = 5;
         private const int dkgSessionTimeout = 1;
+        private const int _signalRange = 3;
         private readonly ISrwcService srwcService;
         private readonly IAuthentication authentication;
         private readonly IGPS gps;
@@ -44,10 +46,10 @@ namespace Theseus.Core
         private readonly IDKGClient dkgClient;
         private readonly IMessageLog messageLog;
         private readonly INavigation navigation;
-
+        private readonly IRequestAndStateValidator requestAndStateValidator;
         private Coordinates currentClientCoords;
 
-        
+
         public Node(
             ISrwcService srwcService,
             IAuthentication authentication,
@@ -55,7 +57,8 @@ namespace Theseus.Core
             IWANCommunication wanCommunication,
             IDKGClient dkgClient,
             IMessageLog messageLog,
-            INavigation navigation)
+            INavigation navigation,
+            IRequestAndStateValidator requestAndStateValidator)
         {
             this.authentication = authentication;
             this.srwcService = srwcService;
@@ -65,6 +68,7 @@ namespace Theseus.Core
             this.dkgClient = dkgClient;
             this.messageLog = messageLog;
             this.navigation = navigation;
+            this.requestAndStateValidator = requestAndStateValidator;
         }
 
         public Node(
@@ -89,7 +93,7 @@ namespace Theseus.Core
         public async Task BroadcastPersonalBeacon()
         {
             var message = CreateBeaconMessage();
-            await srwcService.Broadcast(message);
+            await srwcService.Broadcast(message, this);
         }
 
         public async Task RequestDKG(string proverNodeId, float proverCoords)
@@ -120,9 +124,12 @@ namespace Theseus.Core
         {
             authentication.Verify(dKGRequest);
 
-            if (!dKGRequest.GPSCoordinates.Equals(coordinates.X))
+            if(requestAndStateValidator.IsNotValid(dKGRequest))
+                return;
+
+            if (Geometry.Distance(dKGRequest.GPSCoordinates, coordinates.X) > _signalRange)
             {
-                await srwcService.Broadcast(dKGRequest);
+                await srwcService.Broadcast(dKGRequest, this);
                 return;
             }
 

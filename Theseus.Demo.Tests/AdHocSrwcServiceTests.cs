@@ -71,7 +71,8 @@ namespace Theseus.Demo.Tests
                     wanCommunication,
                     dkgClient,
                     messageLog,
-                    navigation)
+                    navigation, 
+                    Common.CreateStubState())
             {
             }
 

@@ -148,7 +148,7 @@ namespace Theseus.Core.Tests
             var gpsMock = new Mock<IGPS>();
 
             var client = new DKGClient(medium, auth, messageLog, new Session(), new Chronos());
-            var node = new Node(medium, auth, gpsMock.Object, null, client, messageLog, null);
+            var node = new Node(medium, auth, gpsMock.Object, null, client, messageLog, null, Common.CreateStubState());
             var gateway = new FakeNodeGateway(node);
             return gateway;
         }
@@ -158,7 +158,7 @@ namespace Theseus.Core.Tests
             var gpsMock = new Mock<IGPS>();
             var wanComm = new Mock<IWANCommunication>();
 
-            return new Node(srwcService, auth, gpsMock.Object, wanComm.Object, dKGClient, log, null);
+            return new Node(srwcService, auth, gpsMock.Object, wanComm.Object, dKGClient, log, null, Common.CreateStubState());
         }
     }
 }

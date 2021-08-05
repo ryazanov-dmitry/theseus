@@ -130,7 +130,7 @@ namespace Theseus.Core.Tests
         
         private Node CreateNode(IAuthentication auth)
         {
-            return new Node(srwcServiceMock.Object, auth, gps.Object, wanCommunication.Object, dkgClient.Object, new MessageLog(), null);
+            return new Node(srwcServiceMock.Object, auth, gps.Object, wanCommunication.Object, dkgClient.Object, new MessageLog(), null, Common.CreateStubState());
         }
 
         private Node CreateNode()

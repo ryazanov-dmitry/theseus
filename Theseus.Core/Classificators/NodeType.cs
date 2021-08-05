@@ -2,7 +2,7 @@ namespace Theseus.Core.Classificators
 {
     public enum NodeType
     {
-        Serfvice,
+        Service,
         Client,
         Verifier
     }

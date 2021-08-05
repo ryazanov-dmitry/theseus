@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Theseus.Core.Classificators;
 using Theseus.Core.Crypto;
 using Theseus.Core.Dto;
 using Theseus.Core.Exceptions;
@@ -46,8 +47,10 @@ namespace Theseus.Core
         private readonly IDKGClient dkgClient;
         private readonly IMessageLog messageLog;
         private readonly INavigation navigation;
+        private readonly NodeType nodeType;
         private readonly IRequestAndStateValidator requestAndStateValidator;
         private Coordinates currentClientCoords;
+        private readonly HashSet<object> lastDkgRequests = new HashSet<object>();
 
 
         public Node(
@@ -77,7 +80,8 @@ namespace Theseus.Core
             IWANCommunication wanCommunication,
             IDKGClient dkgClient,
             IMessageLog messageLog,
-            INavigation navigation)
+            INavigation navigation,
+            NodeType nodeType)
         {
             this.authentication = new Authentication(new RSA());
             this.srwcService = srwcService;
@@ -87,6 +91,8 @@ namespace Theseus.Core
             this.dkgClient = dkgClient;
             this.messageLog = messageLog;
             this.navigation = navigation;
+            this.nodeType = nodeType;
+            this.requestAndStateValidator = new RequestAndStateValidator(nodeType);
         }
 
 
@@ -124,7 +130,10 @@ namespace Theseus.Core
         {
             authentication.Verify(dKGRequest);
 
-            if(requestAndStateValidator.IsNotValid(dKGRequest))
+            if (TheSame(dKGRequest))
+                return;
+
+            if (requestAndStateValidator.IsNotValid(dKGRequest))
                 return;
 
             if (Geometry.Distance(dKGRequest.GPSCoordinates, coordinates.X) > _signalRange)
@@ -140,6 +149,19 @@ namespace Theseus.Core
             }
 
             await dkgClient.TryInitDKGSession(dKGRequest.NodeId);
+
+            requestAndStateValidator.Transition(States.States.Verifier.InitedDkgSession);
+        }
+
+        private bool TheSame(DKGRequest dKGRequest)
+        {
+            if (lastDkgRequests.Contains(dKGRequest))
+            {
+                return true;
+            }
+
+            lastDkgRequests.Add(dKGRequest);
+            return false;
         }
 
         private void RegisterReceivedBeacon(Beacon beaconMessage)
@@ -201,6 +223,8 @@ namespace Theseus.Core
         {
             // TODO: Validate
 
+            requestAndStateValidator.Transition(deliveryRequest);
+
             // Send DKGRequest
             currentClientCoords = new Coordinates { X = deliveryRequest.GPSCoordinates };
             await RequestDKG(deliveryRequest.NodeId, deliveryRequest.GPSCoordinates);
@@ -208,6 +232,15 @@ namespace Theseus.Core
 
         // TODO: we need to receive multiple Public keys
         public void ReceiveDKGPublicKey(DKGPub DKGPub)
+        {
+            // TODO: Validate
+
+            // TODO: Persist current session
+
+            NavigateToClient(currentClientCoords);
+        }
+
+        public void ReceiveContract(DeliveryContract DKGPub)
         {
             // TODO: Validate
 

@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace Theseus.Core.Dto
 {
     public class DKGRequest : SignedObject
@@ -15,5 +18,19 @@ namespace Theseus.Core.Dto
         /// </summary>
         /// <value></value>
         public float GPSCoordinates { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            return obj is DKGRequest request &&
+                   EqualityComparer<byte[]>.Default.Equals(Signature, request.Signature) &&
+                   EqualityComparer<byte[]>.Default.Equals(Key, request.Key) &&
+                   NodeId == request.NodeId &&
+                   GPSCoordinates == request.GPSCoordinates;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(Signature, Key, NodeId, GPSCoordinates);
+        }
     }
 }

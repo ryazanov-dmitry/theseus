@@ -102,7 +102,7 @@ namespace Theseus.Core.Tests
 
         private FakeNodeGateway CreateNode(ISrwcService srwcService)
         {
-            var node = new Node(srwcService, Common.CreateAuth(), gps.Object, wanCommunication.Object, dkgClient.Object, new MessageLog(), null);
+            var node = new Node(srwcService, Common.CreateAuth(), gps.Object, wanCommunication.Object, dkgClient.Object, new MessageLog(), null, Common.CreateStubState());
             return new FakeNodeGateway(node);
         }
 

@@ -44,7 +44,7 @@ namespace Theseus.Demo.Renderer
 
             var fakeNavigator = new FakeNavigator(fakeGps, world.Ticker);
 
-            var node = new Node(medium, Common.CreateAuth(), fakeGps, null, null, log, fakeNavigator);
+            var node = new Node(medium, Common.CreateAuth(), fakeGps, null, null, log, fakeNavigator, Common.CreateStubState());
             var gateway = new FakeNodeGateway(node);
             subject.FakeNodeGateway = gateway;
             return subject;

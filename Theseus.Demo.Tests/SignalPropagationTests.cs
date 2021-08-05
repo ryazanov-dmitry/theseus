@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
 using Theseus.Core;
+using Theseus.Core.Classificators;
 using Theseus.Core.Dto;
 using Theseus.Core.Messages;
 using Theseus.Core.Tests;
@@ -24,12 +25,15 @@ namespace Theseus.Demo.Tests
                 considerCoordinates: true, writeToSeparateConsole: true);
             var messageLog = new MessageLog(true);
 
+            var targetVerfierDkgClientMock = new Mock<IDKGClient>();
 
-            var requesterNode = CreateNode(world, medium, 1, messageLog);
-            var verifier1 = CreateNode(world, medium, 3, messageLog);
-            var verifier2 = CreateNode(world, medium, 5, messageLog);
-            var targetVerfier = CreateNode(world, medium, 8, messageLog);
-            var client = CreateNode(world, medium, 9, messageLog);
+            var requesterNode = CreateNode(world, medium, 1, messageLog, NodeType.Service);
+            var verifier1 = CreateNode(world, medium, 3, messageLog, NodeType.Verifier);
+            var verifier2 = CreateNode(world, medium, 5, messageLog, NodeType.Verifier);
+            var targetVerfier = CreateNode(world, medium, 8, messageLog, NodeType.Verifier, targetVerfierDkgClientMock.Object);
+            var client = CreateNode(world, medium, 9, messageLog, NodeType.Client);
+
+            targetVerfierDkgClientMock.Setup(x => x.TryInitDKGSession(client.Node.Id));
 
             medium.RegisterColleagues(new List<FakeNodeGateway> {
                 requesterNode, verifier1, verifier2, targetVerfier, client });
@@ -45,15 +49,21 @@ namespace Theseus.Demo.Tests
             await requesterNode.Node.ReceiveDeliveryRequest(deliveryRequest);
 
             //Then
+            targetVerfierDkgClientMock.Verify(x => x.TryInitDKGSession(client.Node.Id), Times.Once);
         }
 
-        private static FakeNodeGateway CreateNode(FakeWorld world, AdHocSrwcService medium, int coord, MessageLog messageLog)
+        private static FakeNodeGateway CreateNode(
+            FakeWorld world, 
+            AdHocSrwcService medium, 
+            int coord, 
+            MessageLog messageLog,
+            NodeType nodeType,
+            IDKGClient dkgClient = null)
         {
             var requesterGps = new FakeGPS(new Coordinates { X = coord });
 
-            var dkgClientMock = new Mock<IDKGClient>();
             var requesterNode = new Node(
-                medium, requesterGps, null, dkgClientMock.Object, messageLog, new FakeNavigator(requesterGps, world.Ticker)
+                medium, requesterGps, null, dkgClient, messageLog, new FakeNavigator(requesterGps, world.Ticker), nodeType
             );
 
             return new FakeNodeGateway(requesterNode);

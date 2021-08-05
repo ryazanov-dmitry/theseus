@@ -1,4 +1,7 @@
+using System;
+using Moq;
 using Theseus.Core.Crypto;
+using Theseus.Core.States;
 
 namespace Theseus.Core.Tests
 {
@@ -7,6 +10,11 @@ namespace Theseus.Core.Tests
         public static IAuthentication CreateAuth()
         {
             return new Authentication(new RSA());
+        }
+
+        public static IRequestAndStateValidator CreateStubState()
+        {
+            return new Mock<IRequestAndStateValidator>().Object;
         }
     }
 }

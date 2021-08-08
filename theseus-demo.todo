@@ -12,8 +12,8 @@ Theseus Demo MVP:
     ☐ I can setup verifier nodes on 1d plane.
     ☐ I can either choose percentage of malicios nodes or pass param on each verifier node.
     ☐ next steps:
-        ☐ service send DkgRequest
-        ☐ verifiers propagate it
+        ✔ service send DkgRequest @done(21-08-08 14:51)
+        ✔ verifiers propagate it @done(21-08-08 14:51)
         ☐ final group completes dkg onboarding
         ✔ see logs in separate console @done(21-07-28 09:11)
 

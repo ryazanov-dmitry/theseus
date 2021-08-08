@@ -49,7 +49,7 @@ namespace Theseus.Core.Tests
             await requestor.Node.RequestDKG(prover.Node.Id, defaultCoords);
 
             //Assert
-            dkgClient.Verify(x => x.TryInitDKGSession(It.IsAny<string>()), Times.Exactly(5));
+            dkgClient.Verify(x => x.TryInitDKGSession(It.IsAny<string>()), Times.Exactly(4));
         }
 
         [Fact]
@@ -62,7 +62,7 @@ namespace Theseus.Core.Tests
 
             var dkgRequest = new DKGRequest
             {
-                GPSCoordinates = 2
+                GPSCoordinates = 5
             };
             Common.CreateAuth().Sign(dkgRequest);
 
@@ -102,7 +102,16 @@ namespace Theseus.Core.Tests
 
         private FakeNodeGateway CreateNode(ISrwcService srwcService)
         {
-            var node = new Node(srwcService, Common.CreateAuth(), gps.Object, wanCommunication.Object, dkgClient.Object, new MessageLog(), null, Common.CreateStubState());
+            var node = new Node(
+                srwcService,
+                Common.CreateAuth(), 
+                gps.Object, 
+                wanCommunication.Object, 
+                dkgClient.Object, 
+                new MessageLog(), 
+                null, 
+                Common.CreateStubState());
+
             return new FakeNodeGateway(node);
         }
 

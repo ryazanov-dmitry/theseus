@@ -40,7 +40,7 @@ namespace Theseus.Demo.Tests
 
             //Then
             Assert.False(((FakeReceivingNode)notInRangeNode.Node).Received);
-            Assert.False(((FakeReceivingNode)inRangeNode.Node).Received);
+            Assert.True(((FakeReceivingNode)inRangeNode.Node).Received);
         }
 
         private FakeNodeGateway CreateNodeWithLocation(AdHocSrwcService service, int sourceSignalCoords)

@@ -115,20 +115,38 @@ namespace Theseus.Core.Tests
             Assert.Equal(2, medium.GetAllMessages().Count);
             Assert.True(medium.GetLastMessageFrom(node2.Node.DKGClient) is DKGStartSessionAccept);
 
-            Thread.Sleep(1000);
+            Thread.Sleep(3000);
             Assert.True(medium.GetLastMessageFrom(node1.Node.DKGClient) is DKGSessionList);
         }
 
-        [Fact(Skip = "future")]
-        public void ReceiveTryInitDKGSession_Before_TryInitDKGSession()
+        [Fact]
+        public async Task ReceiveTryInitDKGSession_Before_TryInitDKGSession()
         {
             //Given
+            const string clientNodeId = "proverNode";
+
+            var firstVerifier = CreateClient();
+            var secondVerifier = CreateNodeWithBeacon(clientNodeId);
+
+            medium.RegisterColleagues(new List<FakeNodeGateway> {
+                firstVerifier,
+                secondVerifier});
 
             //When
+            await firstVerifier.Node.DKGClient.TryInitDKGSession(clientNodeId);
 
             //Then
+            var lastMessage = medium.GetLastMessageFrom(secondVerifier.Node.DKGClient);
+            Assert.True(lastMessage is DKGStartSessionAccept);
         }
 
+        private FakeNodeGateway CreateNodeWithBeacon(string clientNodeId)
+        {
+            var node1MessageLog = new MessageLog();
+            node1MessageLog.Log(clientNodeId, new Beacon());
+
+            return CreateClient(node1MessageLog);
+        }
 
         [Fact(Skip = "future")]
         public void ReceiveTryInitDKGSession_NotReadyForDKG_SendDecline()

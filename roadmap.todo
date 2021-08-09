@@ -1,5 +1,5 @@
 Theseus e2e MVP:
-    ☐ ReceiveTryInitDKGSession_Before_TryInitDKGSession
+    ✔ ReceiveTryInitDKGSession_Before_TryInitDKGSession @done(21-08-09 08:16)
     ☐ Dummy generation of common pub
     ☐ After pub is ready, send it to service via TCP/IP
     ☐ After pub is ready, send it to client via Srwc?

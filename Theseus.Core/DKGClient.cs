@@ -114,7 +114,7 @@ namespace Theseus.Core
                 await SendDKGSessionList(dkgInitRequest.SessionId);
             });
 
-            chronos.SetTimeout(participantListCommit, 1);
+            chronos.SetTimeout(participantListCommit, 3);
         }
 
         private bool CurrentDidnotInitOrWasNotFirst(DKGInitRequest dKGStartRequest)

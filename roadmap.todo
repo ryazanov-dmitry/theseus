@@ -1,0 +1,16 @@
+Theseus e2e MVP:
+    ☐ ReceiveTryInitDKGSession_Before_TryInitDKGSession
+    ☐ Dummy generation of common pub
+    ☐ After pub is ready, send it to service via TCP/IP
+    ☐ After pub is ready, send it to client via Srwc?
+    ☐ After client receives pub, generate dummy contract
+        ☐ send it to service
+    ☐ Service can receive contract -> starts delivery
+    ☐ Service go to the center of client location
+    ☐ When service is in range it sends ONE beacon
+    ☐ If verifier recevied ONE beacon it signs message and send it to service via TCPIP
+
+    renderer:
+        ☐ i can see map and all messages from all nodes
+        ☐ i can see different colors for each participant
+        ☐ e2e scenario

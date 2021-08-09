@@ -119,17 +119,27 @@ namespace Theseus.Core.Tests
             Assert.True(medium.GetLastMessageFrom(node1.Node.DKGClient) is DKGSessionList);
         }
 
-
-        [Fact]
-        public void ReceiveTryInitDKGSession_NotReadyForDKG_SendDecline()
+        [Fact(Skip = "future")]
+        public void ReceiveTryInitDKGSession_Before_TryInitDKGSession()
         {
-            
+            //Given
+
+            //When
+
+            //Then
         }
 
-        [Fact]
+
+        [Fact(Skip = "future")]
+        public void ReceiveTryInitDKGSession_NotReadyForDKG_SendDecline()
+        {
+
+        }
+
+        [Fact(Skip = "future")]
         public void MoreThan1ParallelDKGSessionStart()
         {
-            
+
         }
 
         private FakeNodeGateway CreateClient()

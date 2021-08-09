@@ -109,9 +109,9 @@ namespace Theseus.Core
             };
             session.Add(dkgInitRequest.SessionId, dkgSession);
 
-            var participantListCommit = new Task(() =>
+            var participantListCommit = new Task(async () =>
             {
-                SendDKGSessionList(dkgInitRequest.SessionId);
+                await SendDKGSessionList(dkgInitRequest.SessionId);
             });
 
             chronos.SetTimeout(participantListCommit, 1);

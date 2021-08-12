@@ -39,7 +39,7 @@ namespace Theseus.Core.Tests
 
             if (message is DKGSessionList dkgSessionList)
             {
-                // await dkgClient.ReceiveDKGStartSessionAccept(dkgStartSessionAccept);
+                await Node.DKGClient.ReceiveDKGSessionList(dkgSessionList);
             }
         }
     }

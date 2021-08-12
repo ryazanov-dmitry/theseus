@@ -7,6 +7,7 @@ using Theseus.Core.Crypto;
 using Theseus.Core.Dto;
 using Theseus.Core.Infrastructure;
 using Theseus.Core.Messages;
+using Theseus.Core.Tests.Factories;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -157,6 +158,46 @@ namespace Theseus.Core.Tests
         [Fact(Skip = "future")]
         public void MoreThan1ParallelDKGSessionStart()
         {
+
+        }
+
+
+        /// <summary>
+        /// If Node receives session list:
+        /// 1. We assume that all nodes receive the same list
+        /// 2. Node checks if its Id is in the list.
+        /// 3. Node sends contract to client and service with WAN
+        ///     3.1 Contract includes:
+        ///         - node's public key
+        ///         - client id
+        ///         - geolocation
+        /// </summary>
+        [Fact]
+        public async Task ReceiveDKGSessionList_IdInTheList_SendsPub()
+        {
+            //Given
+            var serviceId = "serviceId";
+            var clientId = "clientId";
+
+            var wanComm = new Mock<IDKGCommunicator>();
+            wanComm.Setup(x => x.SendDKGPub(It.IsAny<string>(), serviceId));
+            wanComm.Setup(x => x.SendDKGPub(It.IsAny<string>(), clientId));
+
+            var verifierNode = DKGClientFactory.CreateDkgClient(wanComm.Object);
+
+            var sessionId = Guid.NewGuid();
+            var list = new DKGSessionList
+            {
+                Participants = new List<string>{},
+                SessionId = sessionId
+            };
+
+            //When
+            await verifierNode.ReceiveDKGSessionList(list);
+
+            //Then
+            wanComm.Verify(x => x.SendDKGPub(It.IsAny<string>(), serviceId), Times.Once);
+            wanComm.Verify(x => x.SendDKGPub(It.IsAny<string>(), clientId), Times.Once);
 
         }
 

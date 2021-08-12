@@ -15,6 +15,7 @@ namespace Theseus.Core
         Task ReceiveTryInitDKGSession(DKGInitRequest dKGStartRequest);
         Task ReceiveDKGStartSessionAccept(DKGStartSessionAccept dkgStartSessionAccept);
         Task SendAccept(Guid dKGStartRequest);
+        Task ReceiveDKGSessionList(DKGSessionList dkgSessionList);
     }
 
     public class DKGClient : IDKGClient
@@ -24,19 +25,22 @@ namespace Theseus.Core
         private readonly IMessageLog messageLog;
         private readonly ISession session;
         private readonly IChronos chronos;
+        private readonly IDKGCommunicator communicator;
 
         public DKGClient(
             ISrwcService srwcService,
             IAuthentication auth,
             IMessageLog messageLog,
             ISession session,
-            IChronos chronos)
+            IChronos chronos,
+            IDKGCommunicator communicator)
         {
             this.srwcService = srwcService;
             this.auth = auth;
             this.messageLog = messageLog;
             this.session = session;
             this.chronos = chronos;
+            this.communicator = communicator;
         }
 
         public async Task ReceiveTryInitDKGSession(DKGInitRequest dKGStartRequest)
@@ -176,6 +180,11 @@ namespace Theseus.Core
         {
             messageLog.Log(message.Base64Key(), message);
         }
+
+        public Task ReceiveDKGSessionList(DKGSessionList dkgSessionList)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     public class DKGSession
@@ -204,8 +213,7 @@ namespace Theseus.Core
 
     public class DKGSessionList : SignedObject
     {
-        public List<string> DKGParticipants { get; set; }
-        public Guid SessionId { get; internal set; }
-        public List<string> Participants { get; internal set; }
+        public Guid SessionId { get; set; }
+        public List<string> Participants { get; set; }
     }
 }
